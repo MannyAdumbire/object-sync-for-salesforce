@@ -115,15 +115,15 @@ class Object_Sync_Sf_Queue {
 			$this->schedulable_classes[ $key ]['frequency'] = $this->get_frequency( $key, 'seconds' );
 		}
 
-		if ( 'asc' === $sort ) {
+		if ( $sort === 'asc' ) {
 			uasort(
 				$this->schedulable_classes,
 				function( $a, $b ) {
 					// we want zero values at the top of an ascending sort.
-					if ( 0 === $a['frequency'] ) {
+					if ( $a['frequency'] === 0 ) {
 						return 1;
 					}
-					if ( 0 === $b['frequency'] ) {
+					if ( $b['frequency'] === 0 ) {
 						return -1;
 					}
 					return $a['frequency'] - $b['frequency'];
@@ -269,7 +269,7 @@ class Object_Sync_Sf_Queue {
 
 		$next_timestamp = as_next_scheduled_action( $hook, $args, $group );
 
-		if ( false !== $next_timestamp ) {
+		if ( $next_timestamp !== false ) {
 			return $next_timestamp;
 		}
 

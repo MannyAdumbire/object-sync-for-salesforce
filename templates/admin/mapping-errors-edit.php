@@ -15,7 +15,7 @@
 	<?php } ?>
 	<input type="hidden" name="action" value="post_object_map" >
 	<input type="hidden" name="method" value="<?php echo esc_attr( $method ); ?>" />
-	<?php if ( 'edit' === $method ) { ?>
+	<?php if ( $method === 'edit' ) { ?>
 	<input type="hidden" name="id" value="<?php echo absint( $map_row['id'] ); ?>" />
 	<?php } ?>
 	<h2><?php echo esc_html__( 'Edit Object Map', 'object-sync-for-salesforce' ); ?></h2>
@@ -94,9 +94,9 @@
 			?>
 		</li>
 		<li>
-			<?php if ( 'push' === $map_row['last_sync_action'] ) : ?>
+			<?php if ( $map_row['last_sync_action'] === 'push' ) : ?>
 				<span class="dashicons dashicons-arrow-right-alt"></span>
-			<?php elseif ( 'pull' === $map_row['last_sync_action'] ) : ?>
+			<?php elseif ( $map_row['last_sync_action'] === 'pull' ) : ?>
 				<span class="dashicons dashicons-arrow-left-alt"></span>
 			<?php endif; ?>
 			<?php
@@ -108,9 +108,9 @@
 			?>
 		</li>
 		<li>
-			<?php if ( '0' === $map_row['last_sync_status'] ) : ?>
+			<?php if ( $map_row['last_sync_status'] === '0' ) : ?>
 				<span class="dashicons dashicons-dismiss"></span>
-			<?php elseif ( '1' === $map_row['last_sync_status'] ) : ?>
+			<?php elseif ( $map_row['last_sync_status'] === '1' ) : ?>
 				<span class="dashicons dashicons-yes-alt"></span>
 			<?php endif; ?>
 			<?php

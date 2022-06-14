@@ -39,7 +39,7 @@
 			<td class="title column-title has-row-actions column-primary" data-colname="<?php echo esc_html__( 'Label', 'object-sync-for-salesforce' ); ?>">
 				<strong>
 					<?php echo esc_html( $record['label'] ); ?>
-					<?php if ( 'active' !== $record['fieldmap_status'] ) : ?>
+					<?php if ( $record['fieldmap_status'] !== 'active' ) : ?>
 						&mdash; <?php echo esc_html( $record['fieldmap_status'] ); ?>
 					<?php endif; ?>
 				</strong>

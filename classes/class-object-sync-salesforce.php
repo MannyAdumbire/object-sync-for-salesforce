@@ -193,7 +193,7 @@ class Object_Sync_Salesforce {
 		 * 		    'class' => 'Object_Sync_Sf_Salesforce_Push',
 		 * 		    'callback' => 'salesforce_push_sync_rest',
 		 * 		),
-		 * 		'wordpress' => array( // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+		 *      'wordpress' => array( // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
 		 * 		    'label' => 'WordPress',
 		 * 		    'class' => 'Object_Sync_Sf_WordPress',
 		 * 		),
@@ -318,7 +318,7 @@ class Object_Sync_Salesforce {
 
 		// check for a deprecated version. if provided, use it.
 		$deprecated_api_version = $this->check_deprecated_salesforce_api_version( $sf_api_version );
-		if ( '' !== $deprecated_api_version ) {
+		if ( $deprecated_api_version !== '' ) {
 			$sf_api_version_data['rest_api_version']        = $deprecated_api_version;
 			$sf_api_version_data['using_deprecated_option'] = true;
 		}
@@ -352,14 +352,14 @@ class Object_Sync_Salesforce {
 	private function check_deprecated_salesforce_api_version( $sf_api_version ) {
 		$deprecated_api_version = defined( 'OBJECT_SYNC_SF_SALESFORCE_API_VERSION' ) ? OBJECT_SYNC_SF_SALESFORCE_API_VERSION : '';
 		// if the constant exists.
-		if ( '' === $deprecated_api_version ) {
+		if ( $deprecated_api_version === '' ) {
 			$deprecated_option_key = $this->option_prefix . 'api_version';
 			$deprecated_api_option = get_option( $deprecated_option_key, 'not-exists' );
 			// if the option exists (the value in the database is not not-exists).
-			if ( 'not-exists' !== $deprecated_api_option ) {
+			if ( $deprecated_api_option !== 'not-exists' ) {
 				$deprecated_api_version = $deprecated_api_option;
 				// if it exists, and is set to "" or exists and is is the same as the default version, just delete it.
-				if ( '' === $deprecated_api_version || $deprecated_api_version === $sf_api_version ) {
+				if ( $deprecated_api_version === '' || $deprecated_api_version === $sf_api_version ) {
 					$deprecated_api_version = '';
 					delete_option( $deprecated_option_key );
 				}
@@ -413,7 +413,7 @@ class Object_Sync_Salesforce {
 		$sfapi           = '';
 		if ( $consumer_key && $consumer_secret ) {
 			$sfapi = new Object_Sync_Sf_Salesforce();
-			if ( true === $sfapi->is_authorized() ) {
+			if ( $sfapi->is_authorized() === true ) {
 				$is_authorized = true;
 			}
 		}
@@ -453,11 +453,11 @@ class Object_Sync_Salesforce {
 	 */
 	private function is_soap_loaded() {
 		$is_soap_loaded = false;
-		if ( false === $this->is_soap_available() ) {
+		if ( $this->is_soap_available() === false ) {
 			return $is_soap_loaded;
 		}
 		$use_soap = filter_var( get_option( 'object_sync_for_salesforce_use_soap', false ), FILTER_VALIDATE_BOOLEAN );
-		if ( false === $use_soap ) {
+		if ( $use_soap === false ) {
 			return $is_soap_loaded;
 		}
 		if ( class_exists( 'Object_Sync_Sf_Salesforce_Soap_Partner' ) ) {

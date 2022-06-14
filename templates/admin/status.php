@@ -10,7 +10,7 @@
 <h3><?php echo esc_html__( 'Salesforce API Connection Status', 'object-sync-for-salesforce' ); ?></h3>
 
 <p>
-	<?php if ( false === $this->login_credentials['using_deprecated_option'] && false === $this->login_credentials['using_developer_filter'] ) : ?>
+	<?php if ( $this->login_credentials['using_deprecated_option'] === false && $this->login_credentials['using_developer_filter'] === false ) : ?>
 		<?php
 			echo sprintf(
 				// translators: 1) is the version number of the Salesforce REST API.
@@ -18,7 +18,7 @@
 				esc_attr( $this->login_credentials['rest_api_version'] )
 			);
 		?>
-	<?php elseif ( true === $this->login_credentials['using_deprecated_option'] ) : ?>
+	<?php elseif ( $this->login_credentials['using_deprecated_option'] === true ) : ?>
 		<?php echo wp_kses_post( $this->notices_data['deprecated_api_version']['message'] ); ?>
 	<?php else : ?>
 		<?php
@@ -32,7 +32,7 @@
 </p>
 
 <h3><?php echo esc_html__( 'Test Salesforce API Call', 'object-sync-for-salesforce' ); ?></h3>
-<?php if ( '' !== $contacts_apicall_summary && isset( $contacts['data']['records'] ) ) : ?>
+<?php if ( $contacts_apicall_summary !== '' && isset( $contacts['data']['records'] ) ) : ?>
 	<table class="widefat striped">
 		<thead>
 			<summary>
@@ -52,7 +52,7 @@
 			<?php } ?>
 		</tbody>
 	</table>
-<?php elseif ( '' !== $contacts_apicall_summary ) : ?>
+<?php elseif ( $contacts_apicall_summary !== '' ) : ?>
 	<p><?php echo wp_kses_post( $contacts_apicall_summary ); ?></p>
 <?php endif; ?>
 

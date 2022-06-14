@@ -171,7 +171,7 @@ class Object_Sync_Sf_WordPress {
 	 * @return array $object_table_structure The table structure.
 	 */
 	public function get_wordpress_table_structure( $object_type ) {
-		if ( 'attachment' === $object_type ) {
+		if ( $object_type === 'attachment' ) {
 			$object_table_structure = array(
 				'object_name'     => 'post',
 				'content_methods' => array(
@@ -195,7 +195,7 @@ class Object_Sync_Sf_WordPress {
 				'where'           => 'AND ' . $this->wpdb->prefix . 'posts.post_type = "' . $object_type . '"',
 				'ignore_keys'     => array(),
 			);
-		} elseif ( 'user' === $object_type ) {
+		} elseif ( $object_type === 'user' ) {
 			// User meta fields need to use update_user_meta for create as well, otherwise it'll just get created twice because apparently when the post is created it's already there.
 
 			$user_meta_methods = array(
@@ -226,7 +226,7 @@ class Object_Sync_Sf_WordPress {
 					'session_tokens',
 				),
 			);
-		} elseif ( 'post' === $object_type ) {
+		} elseif ( $object_type === 'post' ) {
 			$object_table_structure = array(
 				'object_name'     => 'post',
 				'content_methods' => array(
@@ -250,7 +250,7 @@ class Object_Sync_Sf_WordPress {
 				'where'           => 'AND ' . $this->wpdb->prefix . 'posts.post_type = "' . $object_type . '"',
 				'ignore_keys'     => array(),
 			);
-		} elseif ( 'category' === $object_type || 'tag' === $object_type || 'post_tag' === $object_type ) {
+		} elseif ( $object_type === 'category' || $object_type === 'tag' || $object_type === 'post_tag' ) {
 			// I am unsure why post_tag wasn't here for so long, but i figure it probably needs to be there.
 			$object_table_structure = array(
 				'object_name'     => 'term',
@@ -275,7 +275,7 @@ class Object_Sync_Sf_WordPress {
 				'where'           => '',
 				'ignore_keys'     => array(),
 			);
-		} elseif ( 'comment' === $object_type ) {
+		} elseif ( $object_type === 'comment' ) {
 			$object_table_structure = array(
 				'object_name'     => 'comment',
 				'content_methods' => array(
@@ -351,7 +351,7 @@ class Object_Sync_Sf_WordPress {
 		$object_fields = array();
 
 		// Try to find the object fields in cache before acquiring it from other source.
-		if ( true === $this->options['cache'] && 'write' !== $this->options['cache'] ) {
+		if ( $this->options['cache'] === true && $this->options['cache'] !== 'write' ) {
 			$cached = $this->cache_get( $wordpress_object, array( 'data', 'meta' ) );
 			if ( is_array( $cached ) ) {
 				$object_fields['data']       = $cached;
@@ -405,19 +405,19 @@ class Object_Sync_Sf_WordPress {
 		$where           = $object_table_structure['where'];
 		$ignore_keys     = $object_table_structure['ignore_keys'];
 
-		if ( true === $is_deleted ) {
+		if ( $is_deleted === true ) {
 			$wordpress_object              = array();
 			$wordpress_object[ $id_field ] = $object_id;
 			return $wordpress_object;
 		}
 
-		if ( 'user' === $object_type ) {
+		if ( $object_type === 'user' ) {
 			$data = get_userdata( $object_id );
-		} elseif ( 'post' === $object_type || 'attachment' === $object_type ) {
+		} elseif ( $object_type === 'post' || $object_type === 'attachment' ) {
 			$data = get_post( $object_id );
-		} elseif ( 'category' === $object_type || 'tag' === $object_type || 'post_tag' === $object_type ) {
+		} elseif ( $object_type === 'category' || $object_type === 'tag' || $object_type === 'post_tag' ) {
 			$data = get_term( $object_id );
-		} elseif ( 'comment' === $object_type ) {
+		} elseif ( $object_type === 'comment' ) {
 			$data = get_comment( $object_id );
 		} else { // This is for custom post types.
 			$data = get_post( $object_id );
@@ -496,7 +496,7 @@ class Object_Sync_Sf_WordPress {
 		$cachekey = md5( wp_json_encode( $args ) );
 		// Cache_expiration is how long it should be stored in the cache.
 		// If we didn't give a custom one, use the default.
-		if ( '' === $cache_expiration ) {
+		if ( $cache_expiration === '' ) {
 			$cache_expiration = $this->options['cache_expiration'];
 		}
 		return $this->sfwp_transients->set( $cachekey, $data, $cache_expiration );
@@ -602,11 +602,11 @@ class Object_Sync_Sf_WordPress {
 			}
 		}
 
-		if ( 'term' === $object_name ) {
+		if ( $object_name === 'term' ) {
 			$taxonomy = $this->wpdb->get_col( "DESC {$tax_table}", 0 );
 			foreach ( $taxonomy as $key => $value ) {
 				$exists = array_search( $value, array_column( $all_fields, 'key' ), true );
-				if ( 0 !== $exists ) {
+				if ( $exists !== 0 ) {
 					$editable = true;
 					if ( $value === $id_field ) {
 						$editable = false;
@@ -959,7 +959,7 @@ class Object_Sync_Sf_WordPress {
 		}
 
 		// This is a new user.
-		if ( false === username_exists( $username ) ) {
+		if ( username_exists( $username ) === false ) {
 
 			// Create the user
 			// WordPress sends a password reset link so this password doesn't get used, but it does exist in the database, which is helpful to prevent access before the user uses their password reset email.
@@ -1040,7 +1040,7 @@ class Object_Sync_Sf_WordPress {
 
 		// If the key is user_email, we need to make it just email because that is how the WordPress method reads it.
 		$method = isset( $methods['method_match'] ) ? $methods['method_match'] : '';
-		if ( '' !== $method ) {
+		if ( $method !== '' ) {
 			// These methods should give us the user object if we are matching for one.
 			// if we are trying to match to a meta field, the method is an object.
 			if ( class_exists( $method ) ) {
@@ -1065,7 +1065,7 @@ class Object_Sync_Sf_WordPress {
 				// User does exist after checking the matching value. we want its id.
 				$user_id = $user->{$id_field};
 
-				if ( true === $check_only ) {
+				if ( $check_only === true ) {
 					// We are just checking to see if there is a match.
 					return $user_id;
 				}
@@ -1081,7 +1081,7 @@ class Object_Sync_Sf_WordPress {
 					'method_modify' => $method,
 					'method_read'   => $methods['method_read'],
 				);
-			} elseif ( false === $check_only ) {
+			} elseif ( $check_only === false ) {
 				// User does not exist after checking the matching value. create it.
 				// On the prematch fields, we specify the method_create param.
 				if ( isset( $methods['method_create'] ) ) {
@@ -1121,10 +1121,10 @@ class Object_Sync_Sf_WordPress {
 			$existing_id = username_exists( $username ); // Returns an id if there is a result.
 
 			// User does not exist after more checking. we want to create it.
-			if ( false === $existing_id && false === $check_only ) {
+			if ( $existing_id === false && $check_only === false ) {
 				$result = $this->user_create( $params );
 				return $result;
-			} elseif ( true === $check_only ) {
+			} elseif ( $check_only === true ) {
 				// We are just checking to see if there is a match.
 				return $existing_id;
 			} else {
@@ -1177,18 +1177,18 @@ class Object_Sync_Sf_WordPress {
 		foreach ( $params as $key => $value ) {
 
 			// if the update value for email already exists on another user, don't fail this update; keep the user's email address.
-			if ( 'user_email' === $key && email_exists( $value['value'] ) ) {
+			if ( $key === 'user_email' && email_exists( $value['value'] ) ) {
 				unset( $params[ $key ] );
 				continue;
 			}
 
 			// if the update value for login already exists on another user, don't fail this update; keep the user's login.
-			if ( 'user_login' === $key && username_exists( $value['value'] ) ) {
+			if ( $key === 'user_login' && username_exists( $value['value'] ) ) {
 				unset( $params[ $key ] );
 				continue;
 			}
 
-			if ( 'wp_update_user' === $value['method_modify'] ) {
+			if ( $value['method_modify'] === 'wp_update_user' ) {
 				$content[ $key ] = $value['value'];
 				unset( $params[ $key ] );
 			}
@@ -1256,7 +1256,7 @@ class Object_Sync_Sf_WordPress {
 			}
 		}
 
-		if ( '' !== $post_type ) {
+		if ( $post_type !== '' ) {
 			$content['post_type'] = $post_type;
 		}
 
@@ -1271,7 +1271,7 @@ class Object_Sync_Sf_WordPress {
 			$content['post_content'] = ' ';
 		}
 
-		if ( 'tribe_events' === $content['post_type'] && function_exists( 'tribe_create_event' ) ) {
+		if ( $content['post_type'] === 'tribe_events' && function_exists( 'tribe_create_event' ) ) {
 			// borrowing some code from https://github.com/tacjtg/rhp-tribe-events/blob/master/rhp-tribe-events.php.
 			if ( isset( $params['_EventStartDate'] ) ) {
 				$content = $this->append_tec_event_dates( $params['_EventStartDate']['value'], 'start', $content );
@@ -1342,12 +1342,12 @@ class Object_Sync_Sf_WordPress {
 	private function post_upsert( $key, $value, $methods, $params, $id_field = 'ID', $pull_to_drafts = false, $post_type = 'post', $check_only = false ) {
 
 		$method = isset( $methods['method_match'] ) ? $methods['method_match'] : '';
-		if ( '' !== $method ) {
+		if ( $method !== '' ) {
 			// By default, posts use get_posts as the method. args can be like this.
 			// The args don't really make sense, and are inconsistently documented.
 			// These methods should give us the post object.
 			$args = array();
-			if ( 'post_title' === $key ) {
+			if ( $key === 'post_title' ) {
 				$params['post_title'] = array(
 					'value'         => $value,
 					'method_modify' => $method,
@@ -1360,7 +1360,7 @@ class Object_Sync_Sf_WordPress {
 			$args['post_type'] = $post_type;
 			$post_statuses     = array( 'publish' );
 
-			if ( true === filter_var( $pull_to_drafts, FILTER_VALIDATE_BOOLEAN ) ) {
+			if ( filter_var( $pull_to_drafts, FILTER_VALIDATE_BOOLEAN ) === true ) {
 				$post_statuses[] = 'draft';
 			}
 			$args['post_status'] = $post_statuses;
@@ -1384,7 +1384,7 @@ class Object_Sync_Sf_WordPress {
 				// Post does exist after checking the matching value. We want its id.
 				$post_id = $posts[0]->{$id_field};
 
-				if ( true === $check_only ) {
+				if ( $check_only === true ) {
 					// We are just checking to see if there is a match.
 					return $post_id;
 				}
@@ -1400,7 +1400,7 @@ class Object_Sync_Sf_WordPress {
 					'method_modify' => $method,
 					'method_read'   => $methods['method_read'],
 				);
-			} elseif ( false === $check_only ) {
+			} elseif ( $check_only === false ) {
 				// Post does not exist after checking the matching value. create it.
 				// On the prematch fields, we specify the method_create param.
 				if ( isset( $methods['method_create'] ) ) {
@@ -1449,10 +1449,10 @@ class Object_Sync_Sf_WordPress {
 			$existing_id = post_exists( $title, $content, $date ); // Returns an id if there is a result. Returns 0 if not.
 
 			// Post does not exist after more checking. maybe we want to create it.
-			if ( 0 === $existing_id && false === $check_only ) {
+			if ( $existing_id === 0 && $check_only === false ) {
 				$result = $this->post_create( $params, $id_field, $post_type );
 				return $result;
-			} elseif ( true === $check_only ) {
+			} elseif ( $check_only === true ) {
 				// We are just checking to see if there is a match.
 				return $existing_id;
 			} else {
@@ -1506,13 +1506,13 @@ class Object_Sync_Sf_WordPress {
 		$content              = array();
 		$content[ $id_field ] = $post_id;
 		foreach ( $params as $key => $value ) {
-			if ( 'wp_update_post' === $value['method_modify'] ) {
+			if ( $value['method_modify'] === 'wp_update_post' ) {
 				$content[ $key ] = $value['value'];
 				unset( $params[ $key ] );
 			}
 		}
 
-		if ( '' !== $post_type ) {
+		if ( $post_type !== '' ) {
 			$content['post_type'] = $post_type;
 		}
 
@@ -1605,7 +1605,7 @@ class Object_Sync_Sf_WordPress {
 			$success = true;
 			$errors  = array();
 
-			if ( false !== $filename ) {
+			if ( $filename !== false ) {
 				// According to https://codex.wordpress.org/Function_Reference/wp_insert_attachment we need this file.
 				require_once ABSPATH . 'wp-admin/includes/image.php';
 				// Generate metadata for the attachment.
@@ -1613,7 +1613,7 @@ class Object_Sync_Sf_WordPress {
 				wp_update_attachment_metadata( $attachment_id, $attach_data );
 			}
 
-			if ( 0 !== $parent ) {
+			if ( $parent !== 0 ) {
 				set_post_thumbnail( $parent_post_id, $attachment_id );
 			}
 
@@ -1653,13 +1653,13 @@ class Object_Sync_Sf_WordPress {
 	private function attachment_upsert( $key, $value, $methods, $params, $id_field = 'ID', $check_only = false ) {
 
 		$method = isset( $methods['method_match'] ) ? $methods['method_match'] : '';
-		if ( '' !== $method ) {
+		if ( $method !== '' ) {
 			// Get_posts is more helpful here, so that is the method attachment uses for 'read'.
 			// By default, posts use get_posts as the method. args can be like this.
 			// The args don't really make sense, and are inconsistently documented.
 			// These methods should give us the post object.
 			$args = array();
-			if ( 'post_title' === $key ) {
+			if ( $key === 'post_title' ) {
 				$params['post_title'] = array(
 					'value'         => $value,
 					'method_modify' => $method,
@@ -1690,7 +1690,7 @@ class Object_Sync_Sf_WordPress {
 				// Attachment does exist after checking the matching value. we want its id.
 				$attachment_id = $posts[0]->{$id_field};
 
-				if ( true === $check_only ) {
+				if ( $check_only === true ) {
 					// We are just checking to see if there is a match.
 					return $attachment_id;
 				}
@@ -1706,7 +1706,7 @@ class Object_Sync_Sf_WordPress {
 					'method_modify' => $method,
 					'method_read'   => $methods['method_read'],
 				);
-			} elseif ( false === $check_only ) {
+			} elseif ( $check_only === false ) {
 				// Attachment does not exist after checking the matching value. create it.
 				// On the prematch fields, we specify the method_create param.
 				if ( isset( $methods['method_create'] ) ) {
@@ -1755,10 +1755,10 @@ class Object_Sync_Sf_WordPress {
 			$existing_id = post_exists( $title, $content, $date ); // Returns an id if there is a result. Returns 0 if not.
 
 			// Attachment does not exist after more checking. maybe we want to create it.
-			if ( 0 === $existing_id && false === $check_only ) {
+			if ( $existing_id === 0 && $check_only === false ) {
 				$result = $this->attachment_create( $params );
 				return $result;
-			} elseif ( true === $check_only ) {
+			} elseif ( $check_only === true ) {
 				// We are just checking to see if there is a match.
 				return $existing_id;
 			} else {
@@ -1814,7 +1814,7 @@ class Object_Sync_Sf_WordPress {
 		$content              = array();
 		$content[ $id_field ] = $attachment_id;
 		foreach ( $params as $key => $value ) {
-			if ( 'wp_insert_attachment' === $value['method_modify'] ) { // Should also be insert attachment maybe.
+			if ( $value['method_modify'] === 'wp_insert_attachment' ) { // Should also be insert attachment maybe.
 				$content[ $key ] = $value['value'];
 				unset( $params[ $key ] );
 			}
@@ -1841,7 +1841,7 @@ class Object_Sync_Sf_WordPress {
 			$success = true;
 			$errors  = array();
 
-			if ( false !== $filename ) {
+			if ( $filename !== false ) {
 				// According to https://codex.wordpress.org/Function_Reference/wp_insert_attachment we need this file.
 				require_once ABSPATH . 'wp-admin/includes/image.php';
 				// Generate metadata for the attachment.
@@ -1863,7 +1863,7 @@ class Object_Sync_Sf_WordPress {
 
 			$meta_updated = wp_update_attachment_metadata( $attachment_id, $attach_data );
 
-			if ( false === $meta_updated ) {
+			if ( $meta_updated === false ) {
 				$success  = false;
 				$errors[] = array(
 					'key'   => $key,
@@ -1871,7 +1871,7 @@ class Object_Sync_Sf_WordPress {
 				);
 			}
 
-			if ( 0 !== $parent ) {
+			if ( $parent !== 0 ) {
 				set_post_thumbnail( $parent_post_id, $attachment_id );
 			}
 
@@ -1918,7 +1918,7 @@ class Object_Sync_Sf_WordPress {
 	 *   "errors" : [ ],
 	 */
 	private function term_create( $params, $taxonomy, $id_field = 'ID' ) {
-		if ( 'tag' === $taxonomy ) {
+		if ( $taxonomy === 'tag' ) {
 			$taxonomy = 'post_tag';
 		}
 		// Load all params with a method_modify of the object structure's content_method into $content.
@@ -1926,11 +1926,11 @@ class Object_Sync_Sf_WordPress {
 		$structure = $this->get_wordpress_table_structure( $taxonomy );
 		$args      = array();
 		foreach ( $params as $key => $value ) {
-			if ( 'name' === $key ) {
+			if ( $key === 'name' ) {
 				$name = $value['value'];
 				unset( $params[ $key ] );
 			}
-			if ( in_array( $value['method_modify'], $structure['content_methods'], true ) && 'name' !== $key ) {
+			if ( in_array( $value['method_modify'], $structure['content_methods'], true ) && $key !== 'name' ) {
 				$args[ $key ] = $value['value'];
 				unset( $params[ $key ] );
 			}
@@ -1990,11 +1990,11 @@ class Object_Sync_Sf_WordPress {
 	 *   "errors" : [ ],
 	 */
 	private function term_upsert( $key, $value, $methods, $params, $taxonomy, $id_field = 'ID', $pull_to_drafts = false, $check_only = false ) {
-		if ( 'tag' === $taxonomy ) {
+		if ( $taxonomy === 'tag' ) {
 			$taxonomy = 'post_tag';
 		}
 		$method = isset( $methods['method_match'] ) ? $methods['method_match'] : '';
-		if ( '' !== $method ) {
+		if ( $method !== '' ) {
 			// These methods should give us the term object if we are matching for one.
 			// If we are trying to match to a meta field, the method is an object.
 			if ( class_exists( $method ) ) {
@@ -2016,7 +2016,7 @@ class Object_Sync_Sf_WordPress {
 				// Term does exist after checking the matching value. we want its id.
 				$term_id = $term->{$id_field};
 
-				if ( true === $check_only ) {
+				if ( $check_only === true ) {
 					// We are just checking to see if there is a match.
 					return $term_id;
 				}
@@ -2032,7 +2032,7 @@ class Object_Sync_Sf_WordPress {
 					'method_modify' => $method,
 					'method_read'   => $methods['method_read'],
 				);
-			} elseif ( false === $check_only ) {
+			} elseif ( $check_only === false ) {
 				// Term does not exist after checking the matching value. Create it.
 				// On the prematch fields, we specify the method_create param.
 				if ( isset( $methods['method_create'] ) ) {
@@ -2078,10 +2078,10 @@ class Object_Sync_Sf_WordPress {
 			}
 
 			// Term does not exist after more checking. maybe we want to create it.
-			if ( null === $existing_id && false === $check_only ) {
+			if ( $existing_id === null && $check_only === false ) {
 				$result = $this->term_create( $params, $taxonomy, $id_field );
 				return $result;
-			} elseif ( true === $check_only ) {
+			} elseif ( $check_only === true ) {
 				// We are just checking to see if there is a match.
 				return $existing_id;
 			} else {
@@ -2128,12 +2128,12 @@ class Object_Sync_Sf_WordPress {
 	 *   "errors" : [ ],
 	 */
 	private function term_update( $term_id, $params, $taxonomy, $id_field = 'ID' ) {
-		if ( 'tag' === $taxonomy ) {
+		if ( $taxonomy === 'tag' ) {
 			$taxonomy = 'post_tag';
 		}
 		$args = array();
 		foreach ( $params as $key => $value ) {
-			if ( 'wp_update_term' === $value['method_modify'] ) {
+			if ( $value['method_modify'] === 'wp_update_term' ) {
 				$args[ $key ] = $value['value'];
 				unset( $params[ $key ] );
 			}
@@ -2181,7 +2181,7 @@ class Object_Sync_Sf_WordPress {
 	 * @return bool True if successful, false if failed.
 	 */
 	private function term_delete( $term_id, $taxonomy ) {
-		if ( 'tag' === $taxonomy ) {
+		if ( $taxonomy === 'tag' ) {
 			$taxonomy = 'post_tag';
 		}
 		$result = wp_delete_term( $term_id, $taxonomy );
@@ -2280,10 +2280,10 @@ class Object_Sync_Sf_WordPress {
 	 */
 	private function comment_upsert( $key, $value, $methods, $params, $id_field = 'comment_ID', $pull_to_drafts = false, $check_only = false ) {
 		$method = isset( $methods['method_match'] ) ? $methods['method_match'] : '';
-		if ( 'get_comment' === $method ) {
+		if ( $method === 'get_comment' ) {
 			$method = 'get_comments';
 		}
-		if ( '' !== $method ) {
+		if ( $method !== '' ) {
 
 			// These methods should give us the comment object if we are matching for one.
 			// If we are trying to match to a meta field, the method is an object.
@@ -2303,7 +2303,7 @@ class Object_Sync_Sf_WordPress {
 				}
 			} else {
 				$match = array();
-				if ( 'comment_author' === $key ) {
+				if ( $key === 'comment_author' ) {
 					$match['author__in'] = array( $value );
 				} else {
 					$key           = str_replace( 'comment_', '', $key );
@@ -2312,12 +2312,12 @@ class Object_Sync_Sf_WordPress {
 				$comments = $method( $match );
 			}
 
-			if ( 1 === count( $comments ) && isset( $comments ) && isset( $comments[0]->{$id_field} ) ) {
+			if ( count( $comments ) === 1 && isset( $comments ) && isset( $comments[0]->{$id_field} ) ) {
 				$comment = $comments[0];
 				// Comment does exist after checking the matching value. we want its id.
 				$comment_id = $comment->{$id_field};
 
-				if ( true === $check_only ) {
+				if ( $check_only === true ) {
 					// We are just checking to see if there is a match.
 					return $comment_id;
 				}
@@ -2351,7 +2351,7 @@ class Object_Sync_Sf_WordPress {
 					0,
 					$status
 				);
-			} elseif ( false === $check_only ) {
+			} elseif ( $check_only === false ) {
 				// Comment does not exist after checking the matching value. Create it.
 				// On the prematch fields, we specify the method_create param.
 				if ( isset( $methods['method_create'] ) ) {
@@ -2395,10 +2395,10 @@ class Object_Sync_Sf_WordPress {
 			$existing_id = comment_exists( $comment_author, $comment_date, $timezone ); // Returns an id if there is a result. Uses $wpdb->get_var, so it returns null if there is no value.
 
 			// Comment does not exist after more checking. We want to create it.
-			if ( null === $existing_id && false === $check_only ) {
+			if ( $existing_id === null && $check_only === false ) {
 				$result = $this->comment_create( $params, $id_field );
 				return $result;
-			} elseif ( true === $check_only ) {
+			} elseif ( $check_only === true ) {
 				// We are just checking to see if there is a match.
 				return $existing_id;
 			} else {
@@ -2448,7 +2448,7 @@ class Object_Sync_Sf_WordPress {
 		$content              = array();
 		$content[ $id_field ] = $comment_id;
 		foreach ( $params as $key => $value ) {
-			if ( 'wp_update_comment' === $value['method_modify'] ) {
+			if ( $value['method_modify'] === 'wp_update_comment' ) {
 				$content[ $key ] = $value['value'];
 				unset( $params[ $key ] );
 			}
@@ -2456,7 +2456,7 @@ class Object_Sync_Sf_WordPress {
 
 		$updated = wp_update_comment( $content );
 
-		if ( 0 === $updated ) {
+		if ( $updated === 0 ) {
 			$success = false;
 			$errors  = $updated;
 		} else {
@@ -2517,14 +2517,14 @@ class Object_Sync_Sf_WordPress {
 			foreach ( $params as $key => $value ) {
 
 				// if the value is empty, skip it.
-				if ( '' === $value['value'] ) {
+				if ( $value['value'] === '' ) {
 					continue;
 				}
 
 				$modify = $value['method_modify'];
 				// Todo: we could provide a way for passing the values in a custom order here.
 				$meta_id = $modify( $parent_object_id, $key, $value['value'] );
-				if ( false === $meta_id ) {
+				if ( $meta_id === false ) {
 					$success  = false;
 					$errors[] = array(
 						'message' => sprintf(
@@ -2566,14 +2566,14 @@ class Object_Sync_Sf_WordPress {
 				$modify = $value['method_modify'];
 
 				// if the value is empty, use the delete method to modify it.
-				if ( '' === $value['value'] ) {
+				if ( $value['value'] === '' ) {
 					$modify = isset( $value['method_delete'] ) ? $value['method_delete'] : $value['method_modify'];
 				}
 
 				$read = $value['method_read'];
 				// todo: we could provide a way for passing the values in a custom order here.
 				$meta_id = $modify( $parent_object_id, $key, $value['value'] );
-				if ( false === $meta_id ) {
+				if ( $meta_id === false ) {
 					$changed = false;
 					// Check and make sure the stored value matches $value['value'], otherwise it's an error.
 					// In some cases, such as picklists, WordPress is dealing with an array that came from Salesforce at this point, so we need to serialize the value before assuming it's an error.
@@ -2624,7 +2624,7 @@ class Object_Sync_Sf_WordPress {
 	 * @return array $content
 	 */
 	private function append_tec_event_dates( $date, $type, $content ) {
-		if ( ( 'start' === $type || 'end' === $type ) && class_exists( 'Tribe__Date_Utils' ) ) {
+		if ( ( $type === 'start' || $type === 'end' ) && class_exists( 'Tribe__Date_Utils' ) ) {
 			$dates                                      = array();
 			$date_type                                  = ucfirst( $type );
 			$timestamp                                  = strtotime( $date );

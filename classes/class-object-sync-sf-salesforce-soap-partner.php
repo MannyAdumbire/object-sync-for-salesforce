@@ -85,7 +85,7 @@ class Object_Sync_Sf_Salesforce_Soap_Partner extends SforcePartnerClient {
 	 * Initialize.
 	 */
 	private function init() {
-		if ( false === $this->salesforce_get_api['soap_available'] ) {
+		if ( $this->salesforce_get_api['soap_available'] === false ) {
 			return;
 		}
 		if ( ! class_exists( 'SforceBaseClient' ) && file_exists( plugin_dir_path( $this->file ) . 'vendor/autoload.php' ) ) {
@@ -151,7 +151,7 @@ class Object_Sync_Sf_Salesforce_Soap_Partner extends SforcePartnerClient {
 			// sf:INVALID_SESSION_ID is thrown on expired login (and other reasons).
 			// Our only recourse is to try refreshing our auth token. If we get any
 			// other exception, bubble it up.
-			if ( 'sf:INVALID_SESSION_ID' !== $e->faultcode ) {
+			if ( $e->faultcode !== 'sf:INVALID_SESSION_ID' ) {
 				throw $e;
 			}
 

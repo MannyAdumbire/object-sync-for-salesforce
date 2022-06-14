@@ -343,7 +343,7 @@ class Object_Sync_Sf_Mapping {
 			$data['version'] = $this->version;
 		}
 		$insert = $this->wpdb->insert( $this->fieldmap_table, $data );
-		if ( 1 === $insert ) {
+		if ( $insert === 1 ) {
 			return $this->wpdb->insert_id;
 		} else {
 			return false;
@@ -360,7 +360,7 @@ class Object_Sync_Sf_Mapping {
 	 */
 	public function get_fieldmaps( $id = null, $conditions = array(), $reset = false ) {
 		$table = $this->fieldmap_table;
-		if ( null !== $id ) { // get one fieldmap.
+		if ( $id !== null ) { // get one fieldmap.
 			$map        = $this->wpdb->get_row( 'SELECT * FROM ' . $table . ' WHERE id = ' . $id, ARRAY_A );
 			$mappings   = array();
 			$mappings[] = $map;
@@ -377,10 +377,10 @@ class Object_Sync_Sf_Mapping {
 				$i     = 0;
 				foreach ( $conditions as $key => $value ) {
 					// if 'any' is the value for fieldmap status, we keep it off the WHERE statement.
-					if ( 'fieldmap_status' === $key && 'any' === $value ) {
+					if ( $key === 'fieldmap_status' && $value === 'any' ) {
 						continue;
 					}
-					if ( 'salesforce_record_type' === $key ) {
+					if ( $key === 'salesforce_record_type' ) {
 						$record_type = sanitize_text_field( $value );
 					} else {
 						$i++;
@@ -390,7 +390,7 @@ class Object_Sync_Sf_Mapping {
 						$where .= '`' . $key . '` = "' . $value . '"';
 					}
 				}
-				if ( '' !== $where ) {
+				if ( $where !== '' ) {
 					$where = ' WHERE ' . $where;
 				}
 			} else {
@@ -502,7 +502,7 @@ class Object_Sync_Sf_Mapping {
 				'id' => $id,
 			)
 		);
-		if ( false === $update ) {
+		if ( $update === false ) {
 			return false;
 		} else {
 			return true;
@@ -543,7 +543,7 @@ class Object_Sync_Sf_Mapping {
 				if ( ! isset( $posted['is_delete'][ $key ] ) ) {
 					$posted['is_delete'][ $key ] = false;
 				}
-				if ( false === $posted['is_delete'][ $key ] ) {
+				if ( $posted['is_delete'][ $key ] === false ) {
 					// I think it's good to over-mention that updateable is really how the Salesforce api spells it.
 					$updateable_key = array_search( $posted['salesforce_field'][ $key ], array_column( $salesforce_fields, 'name' ), true );
 
@@ -641,7 +641,7 @@ class Object_Sync_Sf_Mapping {
 			'id' => $id,
 		);
 		$delete = $this->wpdb->delete( $this->fieldmap_table, $data );
-		if ( 1 === $delete ) {
+		if ( $delete === 1 ) {
 			return true;
 		} else {
 			return false;
@@ -659,7 +659,7 @@ class Object_Sync_Sf_Mapping {
 		$data['created'] = current_time( 'mysql' );
 		// Check to see if we don't know the salesforce id and it is not a temporary id, or if this is pending.
 		// If it is using a temporary id, the map will get updated after it finishes running; it won't call this method unless there's an error, which we should log.
-		if ( substr( $data['salesforce_id'], 0, 7 ) !== 'tmp_sf_' || ( isset( $data['action'] ) && 'pending' === $data['action'] ) ) {
+		if ( substr( $data['salesforce_id'], 0, 7 ) !== 'tmp_sf_' || ( isset( $data['action'] ) && $data['action'] === 'pending' ) ) {
 			unset( $data['action'] );
 			$insert = $this->wpdb->insert( $this->object_map_table, $data );
 		} else {
@@ -679,9 +679,9 @@ class Object_Sync_Sf_Mapping {
 			);
 			return false;
 		}
-		if ( 1 === $insert ) {
+		if ( $insert === 1 ) {
 			return $this->wpdb->insert_id;
-		} elseif ( false !== strpos( $this->wpdb->last_error, 'Duplicate entry' ) ) {
+		} elseif ( strpos( $this->wpdb->last_error, 'Duplicate entry' ) !== false ) {
 			// this error should never happen now, I think. But let's watch and see.
 			$mapping = $this->load_object_maps_by_salesforce_id( $data['salesforce_id'] )[0];
 			$id      = $mapping['id'];
@@ -772,12 +772,12 @@ class Object_Sync_Sf_Mapping {
 			}
 
 			$mappings = $this->wpdb->get_results( 'SELECT * FROM ' . $table . $where . $order, ARRAY_A );
-			if ( ! empty( $mappings ) && 1 === $this->wpdb->num_rows ) {
+			if ( ! empty( $mappings ) && $this->wpdb->num_rows === 1 ) {
 				$mappings = $mappings[0];
 			}
 		} else { // get all of the mappings. ALL THE MAPPINGS.
 			$mappings = $this->wpdb->get_results( 'SELECT * FROM ' . $table . $order, ARRAY_A );
-			if ( ! empty( $mappings ) && 1 === $this->wpdb->num_rows ) {
+			if ( ! empty( $mappings ) && $this->wpdb->num_rows === 1 ) {
 				$mappings = $mappings[0];
 			}
 		}
@@ -808,7 +808,7 @@ class Object_Sync_Sf_Mapping {
 				'id' => $id,
 			)
 		);
-		if ( false === $update ) {
+		if ( $update === false ) {
 			return false;
 		} else {
 			return true;
@@ -841,7 +841,7 @@ class Object_Sync_Sf_Mapping {
 				'id' => $id,
 			);
 			$delete = $this->wpdb->delete( $this->object_map_table, $data );
-			if ( 1 === $delete ) {
+			if ( $delete === 1 ) {
 				return true;
 			} else {
 				return false;
@@ -849,7 +849,7 @@ class Object_Sync_Sf_Mapping {
 		} elseif ( is_array( $id ) ) {
 			$ids    = implode( ',', array_map( 'absint', $id ) );
 			$delete = $this->wpdb->query( "DELETE FROM $this->object_map_table WHERE ID IN ($ids)" );
-			if ( false !== $delete ) {
+			if ( $delete !== false ) {
 				return true;
 			} else {
 				return false;
@@ -864,9 +864,9 @@ class Object_Sync_Sf_Mapping {
 	 * @return string $id is a temporary string that will be replaced if the modification is successful.
 	 */
 	public function generate_temporary_id( $direction ) {
-		if ( 'push' === $direction ) {
+		if ( $direction === 'push' ) {
 			$prefix = 'tmp_sf_';
-		} elseif ( 'pull' === $direction ) {
+		} elseif ( $direction === 'pull' ) {
 			$prefix = 'tmp_wp_';
 		}
 		$id = uniqid( $prefix, true );
@@ -964,7 +964,7 @@ class Object_Sync_Sf_Mapping {
 				// Is the field in WordPress an array, if we unserialize it? Salesforce wants it to be an imploded string.
 				if ( is_array( maybe_unserialize( $object[ $wordpress_field ] ) ) ) {
 					// if the WordPress field is a list of capabilities (the source field is wp_capabilities), we need to get the array keys from WordPress to send them to Salesforce.
-					if ( 'wp_capabilities' === $wordpress_field ) {
+					if ( $wordpress_field === 'wp_capabilities' ) {
 						$object[ $wordpress_field ] = implode( $this->array_delimiter, array_keys( $object[ $wordpress_field ] ) );
 					} else {
 						$object[ $wordpress_field ] = implode( $this->array_delimiter, $object[ $wordpress_field ] );
@@ -975,15 +975,15 @@ class Object_Sync_Sf_Mapping {
 					// Is the Salesforce field a date, and is the WordPress value a valid date?
 					// According to https://salesforce.stackexchange.com/questions/57032/date-format-with-salesforce-rest-api.
 					if ( in_array( $salesforce_field_type, $this->date_types_from_salesforce, true ) ) {
-						if ( '' === $object[ $wordpress_field ] ) {
+						if ( $object[ $wordpress_field ] === '' ) {
 							$object[ $wordpress_field ] = null;
 						} else {
-							if ( false !== strtotime( $object[ $wordpress_field ] ) ) {
+							if ( strtotime( $object[ $wordpress_field ] ) !== false ) {
 								$timestamp = strtotime( $object[ $wordpress_field ] );
 							} else {
 								$timestamp = $object[ $wordpress_field ];
 							}
-							if ( 'datetime' === $salesforce_field_type ) {
+							if ( $salesforce_field_type === 'datetime' ) {
 								$object[ $wordpress_field ] = date_i18n( 'c', $timestamp );
 							} else {
 								$object[ $wordpress_field ] = date_i18n( 'Y-m-d', $timestamp );
@@ -992,7 +992,7 @@ class Object_Sync_Sf_Mapping {
 					}
 
 					// Boolean SF fields only want real boolean values. NULL is also not allowed.
-					if ( 'boolean' === $salesforce_field_type ) {
+					if ( $salesforce_field_type === 'boolean' ) {
 						$object[ $wordpress_field ] = (bool) $object[ $wordpress_field ];
 					}
 				}
@@ -1001,7 +1001,7 @@ class Object_Sync_Sf_Mapping {
 
 				// If the field is a key in Salesforce, remove it from $params to avoid upsert errors from Salesforce,
 				// but still put its name in the params array so we can check for it later.
-				if ( '1' === $fieldmap['is_key'] ) {
+				if ( $fieldmap['is_key'] === '1' ) {
 					if ( ! $use_soap ) {
 						unset( $params[ $salesforce_field ] );
 					}
@@ -1013,7 +1013,7 @@ class Object_Sync_Sf_Mapping {
 				}
 
 				// If the field is a prematch in Salesforce, put its name in the params array so we can check for it later.
-				if ( '1' === $fieldmap['is_prematch'] ) {
+				if ( $fieldmap['is_prematch'] === '1' ) {
 					$params['prematch'] = array(
 						'salesforce_field' => $salesforce_field,
 						'wordpress_field'  => $wordpress_field,
@@ -1030,7 +1030,7 @@ class Object_Sync_Sf_Mapping {
 				// I think it's good to over-mention that updateable is really how the Salesforce api spells it.
 				// Skip fields that aren't updateable when mapping params because Salesforce will error otherwise.
 				// This happens after dealing with the field types because key and prematch should still be available to the plugin, even if the values are not updateable in Salesforce.
-				if ( 1 !== (int) $fieldmap['salesforce_field']['updateable'] ) {
+				if ( (int) $fieldmap['salesforce_field']['updateable'] !== 1 ) {
 					unset( $params[ $salesforce_field ] );
 				}
 
@@ -1040,7 +1040,7 @@ class Object_Sync_Sf_Mapping {
 				// we do not have a WordPress value for this field, or it's empty
 				// it also means the field has not been unset by prematch, updateable, key, or directional flags prior to this check.
 				// When this happens, we should flag that we're missing a required Salesforce field.
-				if ( in_array( $salesforce_field, $params, true ) && false === filter_var( $fieldmap['salesforce_field']['nillable'], FILTER_VALIDATE_BOOLEAN ) && ( ! isset( $object[ $wordpress_field ] ) || '' === $object[ $wordpress_field ] ) ) {
+				if ( in_array( $salesforce_field, $params, true ) && filter_var( $fieldmap['salesforce_field']['nillable'], FILTER_VALIDATE_BOOLEAN ) === false && ( ! isset( $object[ $wordpress_field ] ) || $object[ $wordpress_field ] === '' ) ) {
 					$has_missing_required_salesforce_field = true;
 				}
 
@@ -1055,7 +1055,7 @@ class Object_Sync_Sf_Mapping {
 					if ( in_array( $salesforce_field_type, $this->array_types_from_salesforce, true ) ) {
 						$object[ $salesforce_field ] = explode( $this->array_delimiter, $object[ $salesforce_field ] );
 						// if the WordPress field is a list of capabilities (the destination field is wp_capabilities), we need to set the array for WordPress to save it.
-						if ( 'wp_capabilities' === $wordpress_field ) {
+						if ( $wordpress_field === 'wp_capabilities' ) {
 							$capabilities = array();
 							foreach ( $object[ $salesforce_field ] as $capability ) {
 								$capabilities[ $capability ] = true;
@@ -1068,13 +1068,13 @@ class Object_Sync_Sf_Mapping {
 					switch ( $salesforce_field_type ) {
 						case ( in_array( $salesforce_field_type, $this->date_types_from_salesforce, true ) ):
 							$format = get_option( 'date_format', 'U' );
-							if ( isset( $fieldmap['wordpress_field']['type'] ) && 'datetime' === $fieldmap['wordpress_field']['type'] ) {
+							if ( isset( $fieldmap['wordpress_field']['type'] ) && $fieldmap['wordpress_field']['type'] === 'datetime' ) {
 								$format = 'Y-m-d H:i:s';
 							}
-							if ( 'tribe_events' === $mapping['wordpress_object'] && class_exists( 'Tribe__Events__Main' ) ) {
+							if ( $mapping['wordpress_object'] === 'tribe_events' && class_exists( 'Tribe__Events__Main' ) ) {
 								$format = 'Y-m-d H:i:s';
 							}
-							if ( 'datetime' === $salesforce_field_type ) {
+							if ( $salesforce_field_type === 'datetime' ) {
 								// Note: the Salesforce REST API appears to always return datetimes as GMT values. We should retrieve them that way, then format them to deal with them in WordPress appropriately.
 								// We should not do any converting unless it's a datetime, because if it's a date, Salesforce stores it as midnight. We don't want to convert that.
 								$object[ $salesforce_field ] = get_date_from_gmt( $object[ $salesforce_field ], 'Y-m-d\TH:i:s\Z' ); // convert from GMT to local date/time based on WordPress time zone setting.
@@ -1109,7 +1109,7 @@ class Object_Sync_Sf_Mapping {
 				// If the field is a key in Salesforce, disregard since this is caused by a Salesforce event. We're setting up data to be stored in WordPress here, and WordPress is not concerned with external key designations in Salesforce.
 
 				// If the field is a prematch in Salesforce, put its name in the params array so we can check for it later.
-				if ( '1' === $fieldmap['is_prematch'] ) {
+				if ( $fieldmap['is_prematch'] === '1' ) {
 					$params['prematch'] = array(
 						'salesforce_field' => $salesforce_field,
 						'wordpress_field'  => $wordpress_field,
@@ -1132,7 +1132,7 @@ class Object_Sync_Sf_Mapping {
 				// Skip fields that aren't editable by the plugin when mapping params.
 				// By default this is only the WordPress object's ID field.
 				// @see $wordpress->object_fields() method and object_sync_for_salesforce_wordpress_field_is_editable filter.
-				if ( isset( $fieldmap['wordpress_field']['editable'] ) && true !== (bool) $fieldmap['wordpress_field']['editable'] ) {
+				if ( isset( $fieldmap['wordpress_field']['editable'] ) && (bool) $fieldmap['wordpress_field']['editable'] !== true ) {
 					unset( $params[ $wordpress_field ] );
 					continue;
 				}
@@ -1156,7 +1156,7 @@ class Object_Sync_Sf_Mapping {
 			} // End if() statement.
 		} // End foreach() loop.
 
-		if ( true === $has_missing_required_salesforce_field ) {
+		if ( $has_missing_required_salesforce_field === true ) {
 			update_option( $this->option_prefix . 'missing_required_data_id_' . $object[ $object_id_field ], true, false );
 			return array();
 		}
@@ -1181,7 +1181,7 @@ class Object_Sync_Sf_Mapping {
 			// format the sync triggers.
 			$sync_triggers                    = $this->maybe_upgrade_sync_triggers( $mappings[ $id ]['sync_triggers'], $mapping['version'], $mapping['id'] );
 			$mappings[ $id ]['sync_triggers'] = $sync_triggers;
-			if ( '' !== $record_type && ! in_array( $record_type, $mappings[ $id ]['salesforce_record_types_allowed'], true ) ) {
+			if ( $record_type !== '' && ! in_array( $record_type, $mappings[ $id ]['salesforce_record_types_allowed'], true ) ) {
 				unset( $mappings[ $id ] );
 			}
 		}
@@ -1228,7 +1228,7 @@ class Object_Sync_Sf_Mapping {
 					}
 				}
 
-				if ( '' !== $mapping_id ) {
+				if ( $mapping_id !== '' ) {
 					// format the fieldmap update query for the database.
 					$data = array();
 					if ( ! empty( $updated_sync_triggers ) ) {

@@ -87,17 +87,17 @@ class Object_Sync_Sf_Admin_Notice {
 
 		// class for the notice to use.
 		$class = '';
-		if ( '' !== $this->type ) {
+		if ( $this->type !== '' ) {
 			$class = ' notice-' . $this->type;
 		}
 
 		$dismissible = '';
-		if ( true === $this->dismissible ) {
+		if ( $this->dismissible === true ) {
 			$dismissible = ' is-dismissible';
 		}
 
 		// template for notice has a default.
-		if ( '' === $this->template || ! file_exists( $template ) ) {
+		if ( $this->template === '' || ! file_exists( $template ) ) {
 			$template = $default_template;
 		} else {
 			$template = $this->template;

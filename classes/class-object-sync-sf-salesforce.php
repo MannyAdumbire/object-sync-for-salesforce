@@ -237,7 +237,7 @@ class Object_Sync_Sf_Salesforce {
 				'keyPrefix' => substr( $sf_id, 0, 3 ),
 			)
 		);
-		if ( 1 === count( $objects ) ) {
+		if ( count( $objects ) === 1 ) {
 			// keyPrefix is unique across objects. If there is exactly one return value from objects(), then we have a match.
 			$object = reset( $objects );
 			return $object['name'];
@@ -285,7 +285,7 @@ class Object_Sync_Sf_Salesforce {
 		$this->response = $this->api_http_request( $path, $params, $method, $options, $type );
 
 		// analytic calls that are expired return 404s for some absurd reason.
-		if ( $this->response['code'] && 'run_analytics_report' === debug_backtrace()[1]['function'] ) {
+		if ( $this->response['code'] && debug_backtrace()[1]['function'] === 'run_analytics_report' ) {
 			return $this->response;
 		}
 
@@ -312,7 +312,7 @@ class Object_Sync_Sf_Salesforce {
 				}
 		}
 
-		if ( ! empty( $this->response['data'][0] ) && 1 === count( $this->response['data'] ) ) {
+		if ( ! empty( $this->response['data'][0] ) && count( $this->response['data'] ) === 1 ) {
 			$this->response['data'] = $this->response['data'][0];
 		}
 
@@ -342,14 +342,14 @@ class Object_Sync_Sf_Salesforce {
 		// this merge will override a value in $this->options with the one in $options parameter if there is a matching key.
 		$options = array_merge( $this->options, $options );
 		$url     = $this->get_api_endpoint( $type ) . $path;
-		if ( isset( $options['full_url'] ) && true === $options['full_url'] ) {
+		if ( isset( $options['full_url'] ) && $options['full_url'] === true ) {
 			$url = $path;
 		}
 		$headers = array(
 			'Authorization'   => 'Authorization: OAuth ' . $this->get_access_token(),
 			'Accept-Encoding' => 'Accept-Encoding: gzip, deflate',
 		);
-		if ( 'POST' === $method || 'PATCH' === $method ) {
+		if ( $method === 'POST' || $method === 'PATCH' ) {
 			$headers['Content-Type'] = 'Content-Type: application/json';
 		}
 
@@ -358,16 +358,16 @@ class Object_Sync_Sf_Salesforce {
 			$headers = array_merge( $headers, $options['headers'] );
 		}
 
-		if ( isset( $options['authenticated'] ) && true === $options['authenticated'] ) {
+		if ( isset( $options['authenticated'] ) && $options['authenticated'] === true ) {
 			$headers = false;
 		}
 		// if this request should be cached, see if it already exists
 		// if it is already cached, load it. if not, load it and then cache it if it should be cached
 		// add parameters to the array so we can tell if it was cached or not.
-		if ( true === $options['cache'] && 'write' !== $options['type'] ) {
+		if ( $options['cache'] === true && $options['type'] !== 'write' ) {
 			$cached = $this->wordpress->cache_get( $url, $params );
 			// some api calls can send a reset option, in which case we should redo the request anyway.
-			if ( is_array( $cached ) && ( ! isset( $options['reset'] ) || true !== $options['reset'] ) ) {
+			if ( is_array( $cached ) && ( ! isset( $options['reset'] ) || $options['reset'] !== true ) ) {
 				$result               = $cached;
 				$result['from_cache'] = true;
 				$result['cached']     = true;
@@ -388,14 +388,14 @@ class Object_Sync_Sf_Salesforce {
 			$result['cached']     = false;
 		}
 
-		if ( isset( $options['is_redo'] ) && true === $options['is_redo'] ) {
+		if ( isset( $options['is_redo'] ) && $options['is_redo'] === true ) {
 			$result['is_redo'] = true;
 		} else {
 			$result['is_redo'] = false;
 		}
 
 		// it would be very unfortunate to ever have to do this in a production site.
-		if ( true === $this->debug ) {
+		if ( $this->debug === true ) {
 			// create log entry for the api call if debug is true.
 			$status = 'debug';
 
@@ -414,7 +414,7 @@ class Object_Sync_Sf_Salesforce {
 			// does this API call include a SOQL query?
 			// in PHP 8, there's a new str_ends_with function.
 			if ( function_exists( 'str_ends_with' ) ) {
-				if ( true === str_ends_with( $query_key, $query_end ) ) {
+				if ( str_ends_with( $query_key, $query_end ) === true ) {
 					$is_soql_query = true;
 				}
 			} else {
@@ -426,7 +426,7 @@ class Object_Sync_Sf_Salesforce {
 				// translators: placeholders are: 1) the log status, 2) a sentence about whether there is an SOQL query included.
 				esc_html__( '%1$s Salesforce API call: read the full log entry for request and response details. %2$s', 'object-sync-for-salesforce' ),
 				ucfirst( esc_attr( $status ) ),
-				( false === $is_soql_query ) ? esc_html__( 'There is not an SOQL query included in this request.', 'object-sync-for-salesforce' ) : esc_html__( 'There is an SOQL query included in this request.', 'object-sync-for-salesforce' )
+				( $is_soql_query === false ) ? esc_html__( 'There is not an SOQL query included in this request.', 'object-sync-for-salesforce' ) : esc_html__( 'There is an SOQL query included in this request.', 'object-sync-for-salesforce' )
 			);
 			$body = sprintf(
 				// translators: placeholder is: 1) the API call's HTTP method.
@@ -438,7 +438,7 @@ class Object_Sync_Sf_Salesforce {
 				'<p><strong>' . esc_html__( 'URL of API call to Salesforce:', 'object-sync-for-salesforce' ) . '</strong> %1$s</p>',
 				esc_url( $url )
 			);
-			if ( true === $is_soql_query ) {
+			if ( $is_soql_query === true ) {
 				$query = $salesforce_url_parts[ $query_key ];
 				$soql  = urldecode( $query );
 				$body .= sprintf(
@@ -486,23 +486,23 @@ class Object_Sync_Sf_Salesforce {
 		curl_setopt( $curl, CURLOPT_URL, $url );
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, true );
-		if ( false !== $headers ) {
+		if ( $headers !== false ) {
 			curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
 		} else {
 			curl_setopt( $curl, CURLOPT_HEADER, false );
 		}
 
-		if ( 'POST' === $method ) {
+		if ( $method === 'POST' ) {
 			curl_setopt( $curl, CURLOPT_POST, true );
 			curl_setopt( $curl, CURLOPT_POSTFIELDS, $data );
-		} elseif ( 'PATCH' === $method || 'DELETE' === $method ) {
+		} elseif ( $method === 'PATCH' || $method === 'DELETE' ) {
 			curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, $method );
 			curl_setopt( $curl, CURLOPT_POSTFIELDS, $data );
 		}
 		$json_response = curl_exec( $curl ); // this is possibly gzipped json data.
 		$code          = curl_getinfo( $curl, CURLINFO_HTTP_CODE );
 
-		if ( ( 'PATCH' === $method || 'DELETE' === $method ) && '' === $json_response && 204 === $code ) {
+		if ( ( $method === 'PATCH' || $method === 'DELETE' ) && $json_response === '' && $code === 204 ) {
 			// delete and patch requests return a 204 with an empty body upon success for whatever reason.
 			$data = array(
 				'success' => true,
@@ -541,7 +541,7 @@ class Object_Sync_Sf_Salesforce {
 		// don't use the exception if the status is a success one, or if it just needs a refresh token (salesforce uses 401 for this).
 		if ( ! in_array( $code, $this->success_or_refresh_codes, true ) ) {
 			$curl_error = curl_error( $curl );
-			if ( '' !== $curl_error ) {
+			if ( $curl_error !== '' ) {
 				// create log entry for failed curl.
 				$status = 'error';
 				$title  = sprintf(
@@ -557,7 +557,7 @@ class Object_Sync_Sf_Salesforce {
 					0,
 					$status
 				);
-			} elseif ( isset( $data[0]['errorCode'] ) && '' !== $data[0]['errorCode'] ) { // salesforce uses this structure to return errors
+			} elseif ( isset( $data[0]['errorCode'] ) && $data[0]['errorCode'] !== '' ) { // salesforce uses this structure to return errors
 				// create log entry for failed curl.
 				$status = 'error';
 				$title  = sprintf(
@@ -632,12 +632,12 @@ class Object_Sync_Sf_Salesforce {
 	 */
 	public function get_api_endpoint( $api_type = 'rest' ) {
 		// Special handling for apexrest, since it's not in the identity object.
-		if ( 'apexrest' === $api_type ) {
+		if ( $api_type === 'apexrest' ) {
 			$url = $this->get_instance_url() . '/services/apexrest/';
 		} else {
 			$identity = $this->get_identity();
 			$url      = str_replace( '{version}', $this->rest_api_version, $identity['urls'][ $api_type ] );
-			if ( '' === $identity ) {
+			if ( $identity === '' ) {
 				$url = $this->get_instance_url() . '/services/data/v' . $this->rest_api_version . '/';
 			}
 		}
@@ -725,7 +725,7 @@ class Object_Sync_Sf_Salesforce {
 		$headers  = false;
 		$response = $this->http_request( $url, $data, $headers, 'POST' );
 
-		if ( 200 !== $response['code'] ) {
+		if ( $response['code'] !== 200 ) {
 			throw new Object_Sync_Sf_Exception(
 				esc_html(
 					sprintf(
@@ -761,7 +761,7 @@ class Object_Sync_Sf_Salesforce {
 			'Accept-Encoding' => 'Accept-Encoding: gzip, deflate',
 		);
 		$response = $this->http_request( $id, null, $headers );
-		if ( 200 !== $response['code'] ) {
+		if ( $response['code'] !== 200 ) {
 			throw new Object_Sync_Sf_Exception( esc_html__( 'Unable to access identity service.', 'object-sync-for-salesforce' ), $response['code'] );
 		}
 		$data = $response['data'];
@@ -817,7 +817,7 @@ class Object_Sync_Sf_Salesforce {
 
 		$data = $response['data'];
 
-		if ( 200 !== $response['code'] ) {
+		if ( $response['code'] !== 200 ) {
 			$error = isset( $data['error_description'] ) ? $data['error_description'] : $response['error'];
 			throw new Object_Sync_Sf_Exception( $error, $response['code'] );
 		}
@@ -892,12 +892,12 @@ class Object_Sync_Sf_Salesforce {
 		$search_data = array(
 			'q' => (string) $query,
 		);
-		if ( true === $explain ) {
+		if ( $explain === true ) {
 			$search_data['explain'] = $search_data['q'];
 			unset( $search_data['q'] );
 		}
 		// all is a search through deleted and merged data as well.
-		if ( true === $all ) {
+		if ( $all === true ) {
 			$path = 'queryAll';
 		} else {
 			$path = 'query';
@@ -998,7 +998,7 @@ class Object_Sync_Sf_Salesforce {
 		$value = apply_filters( $this->option_prefix . 'modify_upsert_value', $value );
 
 		$data = $this->api_call( "sobjects/{$name}/{$key}/{$value}", $params, 'PATCH', $options );
-		if ( 300 === $this->response['code'] ) {
+		if ( $this->response['code'] === 300 ) {
 			$data['message'] = esc_html( 'The value provided is not unique.' );
 		}
 		return $data;
@@ -1072,14 +1072,14 @@ class Object_Sync_Sf_Salesforce {
 		$id         = $this->convert_id( $id );
 		$report_url = 'analytics/reports/' . $id . '/instances';
 
-		if ( true === $clear_cache ) {
+		if ( $clear_cache === true ) {
 			delete_transient( $report_url );
 		}
 
 		$instance_id = $this->wordpress->cache_get( $report_url, '' );
 
 		// there is no stored instance id or this is synchronous; retrieve the results for that instance.
-		if ( false === $async || false === $instance_id ) {
+		if ( $async === false || $instance_id === false ) {
 
 			$result = $this->analytics_api(
 				'reports',
@@ -1109,7 +1109,7 @@ class Object_Sync_Sf_Salesforce {
 				}
 
 				// cache the instance id so we can get the report results if they are applicable.
-				if ( '' === $report_cache_expiration ) {
+				if ( $report_cache_expiration === '' ) {
 					$report_cache_expiration = $this->cache_expiration();
 				}
 				$this->wordpress->cache_set( $report_url, '', $instance_id, $report_cache_expiration );
@@ -1122,7 +1122,7 @@ class Object_Sync_Sf_Salesforce {
 		$result = $this->api_call( $report_url . "/{$instance_id}", array(), $method );
 
 		// the report instance is expired. rerun it.
-		if ( 404 === $result['code'] ) {
+		if ( $result['code'] === 404 ) {
 			$this->run_analytics_report( $id, true, true );
 		}
 
@@ -1130,13 +1130,13 @@ class Object_Sync_Sf_Salesforce {
 		// do this because salesforce will have errors if the instance has expired or is currently running
 		// remember: the result of the above api_call is already cached (or not) according to the plugin's generic settings
 		// this is fine I think, although it is a bit of redundancy in this case.
-		if ( true === $cache_instance ) {
+		if ( $cache_instance === true ) {
 			$cached = $this->wordpress->cache_get( $report_url . '_instance_cached', '' );
 			if ( is_array( $cached ) ) {
 				$result = $cached;
 			} else {
-				if ( 'Success' === $result['data']['attributes']['status'] ) {
-					if ( '' === $instance_cache_expiration ) {
+				if ( $result['data']['attributes']['status'] === 'Success' ) {
+					if ( $instance_cache_expiration === '' ) {
 						$instance_cache_expiration = $this->cache_expiration();
 					}
 					$this->wordpress->cache_set( $report_url . '_instance_cached', '', $result, $instance_cache_expiration );
@@ -1252,7 +1252,7 @@ class Object_Sync_Sf_Salesforce {
 		// example of how this runs: $this->get_record_type_id_by_developer_name( 'Account', 'HH_Account' );.
 
 		$cached = $this->wordpress->cache_get( 'salesforce_record_types', '' );
-		if ( is_array( $cached ) && ( ! isset( $reset ) || true !== $reset ) ) {
+		if ( is_array( $cached ) && ( ! isset( $reset ) || $reset !== true ) ) {
 			return ! empty( $cached[ $name ][ $devname ] ) ? $cached[ $name ][ $devname ]['Id'] : null;
 		}
 

@@ -86,10 +86,10 @@
 							$trigger_type = esc_html__( 'Pull From Salesforce', 'object-sync-for-salesforce' );
 						} elseif ( strpos( $mapping_error['wordpress_id'], 'tmp_wp_' ) === 0 ) {
 							$trigger_type = esc_html__( 'Push to Salesforce', 'object-sync-for-salesforce' );
-						} elseif ( '0' === $mapping_error['last_sync_status'] ) {
-							if ( 'push' === $mapping_error['last_sync_action'] ) {
+						} elseif ( $mapping_error['last_sync_status'] === '0' ) {
+							if ( $mapping_error['last_sync_action'] === 'push' ) {
 								$trigger_type = esc_html__( 'Push to Salesforce', 'object-sync-for-salesforce' );
-							} elseif ( 'pull' === $mapping_error['last_sync_action'] ) {
+							} elseif ( $mapping_error['last_sync_action'] === 'pull' ) {
 								$trigger_type = esc_html__( 'Pull From Salesforce', 'object-sync-for-salesforce' );
 							}
 						}

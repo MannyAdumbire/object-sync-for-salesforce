@@ -14,7 +14,7 @@
 	<?php } ?>
 	<input type="hidden" name="action" value="post_fieldmap" >
 	<input type="hidden" name="method" value="<?php echo esc_attr( $method ); ?>" />
-	<?php if ( 'edit' === $method ) { ?>
+	<?php if ( $method === 'edit' ) { ?>
 	<input type="hidden" name="id" value="<?php echo absint( $map['id'] ); ?>" />
 	<?php } ?>
 	<div class="fieldmap_label">
@@ -67,7 +67,7 @@
 				$display_value = get_option( $this->option_prefix . 'salesforce_field_display_value', 'field_label' );
 				foreach ( $salesforce_objects as $object ) {
 
-					if ( 'api_name' === $display_value ) {
+					if ( $display_value === 'api_name' ) {
 						$object['label'] = $object['name'];
 					}
 
@@ -182,7 +182,7 @@
 				<?php
 				$display_value = get_option( $this->option_prefix . 'salesforce_field_display_value', 'field_label' );
 				foreach ( $object_fields as $key => $value ) {
-					if ( 'api_name' === $display_value ) {
+					if ( $display_value === 'api_name' ) {
 						$value['label'] = $value['name'];
 					}
 					if ( $pull_trigger_field === $value['name'] ) {
@@ -245,7 +245,7 @@
 			</tfoot>
 			<tbody>
 				<?php
-				if ( isset( $fieldmap_fields ) && null !== $fieldmap_fields && is_array( $fieldmap_fields ) ) {
+				if ( isset( $fieldmap_fields ) && $fieldmap_fields !== null && is_array( $fieldmap_fields ) ) {
 					foreach ( $fieldmap_fields as $key => $value ) {
 						$key = md5( $key . time() );
 						?>
@@ -261,7 +261,7 @@
 								} else {
 									$selected = '';
 								}
-								if ( isset( $wordpress_field['editable'] ) && false === $wordpress_field['editable'] ) {
+								if ( isset( $wordpress_field['editable'] ) && $wordpress_field['editable'] === false ) {
 									$locked = ' 🔒';
 								} else {
 									$locked = '';
@@ -299,15 +299,15 @@
 									$selected = '';
 								}
 
-								if ( 'api_name' === $display_value ) {
+								if ( $display_value === 'api_name' ) {
 									$salesforce_field['label'] = $salesforce_field['name'];
 								}
 
-								if ( false === $salesforce_field['nillable'] ) {
+								if ( $salesforce_field['nillable'] === false ) {
 									$salesforce_field['label'] .= ' *';
 								}
 
-								if ( false === $salesforce_field['updateable'] ) {
+								if ( $salesforce_field['updateable'] === false ) {
 									$locked = ' 🔒';
 								} else {
 									$locked = '';
@@ -327,7 +327,7 @@
 					</td>
 					<td class="column-is_prematch">
 						<?php
-						if ( isset( $value['is_prematch'] ) && '1' === $value['is_prematch'] ) {
+						if ( isset( $value['is_prematch'] ) && $value['is_prematch'] === '1' ) {
 							$checked = ' checked';
 						} else {
 							$checked = '';
@@ -337,7 +337,7 @@
 					</td>
 					<td class="column-is_key">
 						<?php
-						if ( isset( $value['is_key'] ) && '1' === $value['is_key'] ) {
+						if ( isset( $value['is_key'] ) && $value['is_key'] === '1' ) {
 							$checked = ' checked';
 						} else {
 							$checked = '';
@@ -348,11 +348,11 @@
 					<td class="column-direction">
 						<?php
 						if ( isset( $value['direction'] ) ) {
-							if ( 'sf_wp' === $value['direction'] ) {
+							if ( $value['direction'] === 'sf_wp' ) {
 								$checked_sf_wp = ' checked';
 								$checked_wp_sf = '';
 								$checked_sync  = '';
-							} elseif ( 'wp_sf' === $value['direction'] ) {
+							} elseif ( $value['direction'] === 'wp_sf' ) {
 								$checked_sf_wp = '';
 								$checked_wp_sf = ' checked';
 								$checked_sync  = '';
@@ -392,7 +392,7 @@
 									$disabled              = '';
 									$disable_mapped_fields = get_option( $this->option_prefix . 'disable_mapped_fields', false );
 									$disable_mapped_fields = filter_var( $disable_mapped_fields, FILTER_VALIDATE_BOOLEAN );
-									if ( true === $disable_mapped_fields ) {
+									if ( $disable_mapped_fields === true ) {
 										$key    = null;
 										$needle = $wordpress_field['key']; // the current WP field.
 										// check the already mapped fields for the current field.
@@ -405,12 +405,12 @@
 											}
 										);
 										// disable fields that are already mapped.
-										if ( null !== $key ) {
+										if ( $key !== null ) {
 											$disabled = ' disabled';
 										}
 									}
 
-									if ( isset( $wordpress_field['editable'] ) && false === $wordpress_field['editable'] ) {
+									if ( isset( $wordpress_field['editable'] ) && $wordpress_field['editable'] === false ) {
 										$locked = ' 🔒';
 									} else {
 										$locked = '';
@@ -444,7 +444,7 @@
 									$disabled              = '';
 									$disable_mapped_fields = get_option( $this->option_prefix . 'disable_mapped_fields', false );
 									$disable_mapped_fields = filter_var( $disable_mapped_fields, FILTER_VALIDATE_BOOLEAN );
-									if ( true === $disable_mapped_fields ) {
+									if ( $disable_mapped_fields === true ) {
 										$key    = null;
 										$needle = $salesforce_field['name']; // the current Salesforce field.
 										// check the already mapped fields for the current field.
@@ -457,20 +457,20 @@
 											}
 										);
 										// disable fields that are already mapped.
-										if ( null !== $key ) {
+										if ( $key !== null ) {
 											$disabled = ' disabled';
 										}
 									}
 
-									if ( 'api_name' === $display_value ) {
+									if ( $display_value === 'api_name' ) {
 										$salesforce_field['label'] = $salesforce_field['name'];
 									}
 
-									if ( false === $salesforce_field['nillable'] ) {
+									if ( $salesforce_field['nillable'] === false ) {
 										$salesforce_field['label'] .= ' *';
 									}
 
-									if ( false === $salesforce_field['updateable'] ) {
+									if ( $salesforce_field['updateable'] === false ) {
 										$locked = ' 🔒';
 									} else {
 										$locked = '';
@@ -511,7 +511,7 @@
 		<?php
 		$add_button_label_more  = esc_html__( 'Add another field mapping', 'object-sync-for-salesforce' );
 		$add_button_label_first = esc_html__( 'Add field mapping', 'object-sync-for-salesforce' );
-		if ( isset( $fieldmap_fields ) && null !== $fieldmap_fields ) {
+		if ( isset( $fieldmap_fields ) && $fieldmap_fields !== null ) {
 			$add_button_label = $add_button_label_more;
 		} else {
 			$add_button_label = $add_button_label_first;
@@ -570,24 +570,24 @@
 			</p>
 		</div>
 		<div class="checkboxes">
-			<label><input type="checkbox" name="push_async" id="process-async" value="1" <?php echo isset( $push_async ) && '1' === $push_async ? ' checked' : ''; ?>><?php echo esc_html__( 'Process Asynchronously', 'object-sync-for-salesforce' ); ?></label>
+			<label><input type="checkbox" name="push_async" id="process-async" value="1" <?php echo isset( $push_async ) && $push_async === '1' ? ' checked' : ''; ?>><?php echo esc_html__( 'Process Asynchronously', 'object-sync-for-salesforce' ); ?></label>
 			<p class="description">
 				<?php echo esc_html__( 'If selected, push data will be added to the queue, rather than being sent to Salesforce immediately. Usually a pushed record that is added to the queue runs within a few seconds, but it is not instantaneous. Having these tasks run in a queue can benefit site performance.', 'object-sync-for-salesforce' ); ?>
 			</p>
 		</div>
 		<div class="checkboxes">
-			<label><input type="checkbox" name="always_delete_object_maps_on_delete" id="always-delete-object-maps-on-delete" value="1" <?php echo isset( $always_delete_object_maps_on_delete ) && '1' === $always_delete_object_maps_on_delete ? ' checked' : ''; ?>><?php echo esc_html__( 'Always Delete Object Maps When Fieldmap Records Are Deleted', 'object-sync-for-salesforce' ); ?></label>
+			<label><input type="checkbox" name="always_delete_object_maps_on_delete" id="always-delete-object-maps-on-delete" value="1" <?php echo isset( $always_delete_object_maps_on_delete ) && $always_delete_object_maps_on_delete === '1' ? ' checked' : ''; ?>><?php echo esc_html__( 'Always Delete Object Maps When Fieldmap Records Are Deleted', 'object-sync-for-salesforce' ); ?></label>
 			<p class="description"><?php echo esc_html__( 'If selected, when a record in either the WordPress or Salesforce object type of this fieldmap is deleted, the plugin will check for object maps connected to the record that was deleted even if the delete action trigger is not checked. If it finds those object maps, they will be deleted.', 'object-sync-for-salesforce' ); ?></p>
 		</div>
 	</fieldset>
 	<fieldset class="fieldmap_settings other_settings">
 		<legend><?php echo esc_html__( 'Fieldmap Settings', 'object-sync-for-salesforce' ); ?></legend>
 		<div class="checkboxes">
-			<label><input type="checkbox" name="push_drafts" id="push-drafts" value="1" <?php echo isset( $push_drafts ) && '1' === $push_drafts ? ' checked' : ''; ?>><?php echo esc_html__( 'Push Drafts', 'object-sync-for-salesforce' ); ?></label>
+			<label><input type="checkbox" name="push_drafts" id="push-drafts" value="1" <?php echo isset( $push_drafts ) && $push_drafts === '1' ? ' checked' : ''; ?>><?php echo esc_html__( 'Push Drafts', 'object-sync-for-salesforce' ); ?></label>
 			<p class="description"><?php echo esc_html__( 'If selected, WordPress will send drafts of this object type (if it creates drafts for it) to Salesforce.', 'object-sync-for-salesforce' ); ?></p>
 		</div>
 		<div class="checkboxes">
-			<label><input type="checkbox" name="pull_to_drafts" id="pull-to-drafts" value="1" <?php echo isset( $pull_to_drafts ) && '1' === $pull_to_drafts ? ' checked' : ''; ?>><?php echo esc_html__( 'Pull to Drafts', 'object-sync-for-salesforce' ); ?></label>
+			<label><input type="checkbox" name="pull_to_drafts" id="pull-to-drafts" value="1" <?php echo isset( $pull_to_drafts ) && $pull_to_drafts === '1' ? ' checked' : ''; ?>><?php echo esc_html__( 'Pull to Drafts', 'object-sync-for-salesforce' ); ?></label>
 			<p class="description"><?php echo esc_html__( 'If selected, WordPress will check for matches against existing drafts of this object type, and will also update existing drafts.', 'object-sync-for-salesforce' ); ?></p>
 		</div>
 		<div class="select fieldmap_status">
@@ -596,7 +596,7 @@
 				<?php
 				$fieldmap_statuses = $this->mappings->fieldmap_statuses;
 				foreach ( $fieldmap_statuses as $key => $value ) :
-					if ( '' !== $value ) :
+					if ( $value !== '' ) :
 						$selected = '';
 						if ( ! isset( $fieldmap_status ) ) {
 							$fieldmap_status = 'active';

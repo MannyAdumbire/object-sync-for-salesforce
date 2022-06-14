@@ -196,7 +196,7 @@ class Object_Sync_Sf_Activate {
 		$result_object_map = dbDelta( $object_map_sql );
 
 		$remove_key_version = '1.8.0';
-		if ( '' !== $this->user_installed_version && version_compare( $this->user_installed_version, $remove_key_version, '<' ) ) {
+		if ( $this->user_installed_version !== '' && version_compare( $this->user_installed_version, $remove_key_version, '<' ) ) {
 			$wpdb = $this->wpdb;
 			$wpdb->query( $wpdb->prepare( 'ALTER TABLE %s DROP INDEX salesforce', $object_map_table ) );
 			$wpdb->query( $wpdb->prepare( 'ALTER TABLE %s DROP INDEX salesforce_wordpress', $object_map_table ) );
@@ -210,7 +210,7 @@ class Object_Sync_Sf_Activate {
 		maybe_convert_table_to_utf8mb4( $field_map_table );
 		maybe_convert_table_to_utf8mb4( $object_map_table );
 
-		if ( '' === $this->user_installed_version || version_compare( $this->user_installed_version, $this->version, '<' ) ) {
+		if ( $this->user_installed_version === '' || version_compare( $this->user_installed_version, $this->version, '<' ) ) {
 			update_option( $this->option_prefix . 'db_version', $this->version );
 		}
 
@@ -237,7 +237,7 @@ class Object_Sync_Sf_Activate {
 		$roles = apply_filters( $this->option_prefix . 'roles_configure_salesforce', null );
 
 		// for each role that we have, give it the configure salesforce capability.
-		if ( null !== $roles ) {
+		if ( $roles !== null ) {
 			foreach ( $roles as $role ) {
 				$role = get_role( $role );
 				$role->add_cap( 'configure_salesforce' );
@@ -313,7 +313,7 @@ class Object_Sync_Sf_Activate {
 	public function check_for_action_scheduler( $upgrader_object, $hook_extra ) {
 
 		// skip if this action isn't this plugin being updated.
-		if ( 'plugin' !== $hook_extra['type'] && 'update' !== $hook_extra['action'] && $hook_extra['plugin'] !== $this->slug ) {
+		if ( $hook_extra['type'] !== 'plugin' && $hook_extra['action'] !== 'update' && $hook_extra['plugin'] !== $this->slug ) {
 			return;
 		}
 
@@ -326,7 +326,7 @@ class Object_Sync_Sf_Activate {
 			delete_option( $this->option_prefix . 'push_schedule_unit' );
 			delete_option( $this->option_prefix . 'salesforce_schedule_number' );
 			delete_option( $this->option_prefix . 'salesforce_schedule_unit' );
-			if ( '' === $this->queue ) {
+			if ( $this->queue === '' ) {
 				delete_transient( $this->option_prefix . 'installed_version' );
 				return;
 			}

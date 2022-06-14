@@ -14,7 +14,7 @@ spl_autoload_register(
 	function ( $class_name ) {
 
 		// Only autoload classes from this plugin.
-		if ( 'Object_Sync_Salesforce' !== $class_name && 0 !== strpos( $class_name, 'Object_Sync_' ) ) {
+		if ( $class_name !== 'Object_Sync_Salesforce' && strpos( $class_name, 'Object_Sync_' ) !== 0 ) {
 			return;
 		}
 

@@ -105,7 +105,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 	 */
 	public function init() {
 		$this->configure_debugging();
-		if ( true === $this->enabled ) {
+		if ( $this->enabled === true ) {
 			add_filter( 'cron_schedules', array( $this, 'add_prune_interval' ) );
 			add_filter( 'wp_log_types', array( $this, 'set_log_types' ), 10, 1 );
 			add_filter( 'wp_logging_should_we_prune', array( $this, 'set_prune_option' ), 10, 1 );
@@ -118,7 +118,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 			$are_logs_filtered = apply_filters( 'wp_logging_manage_logs_filtered', false );
 			add_filter( 'wp_logging_manage_logs_filtered', '__return_true' );
 
-			if ( false === $are_logs_filtered ) {
+			if ( $are_logs_filtered === false ) {
 				// add a sortable Type column to the posts admin.
 				add_filter( 'manage_edit-wp_log_columns', array( $this, 'type_column' ), 10, 1 );
 				add_filter( 'manage_edit-wp_log_sortable_columns', array( $this, 'sortable_columns' ), 10, 1 );
@@ -142,7 +142,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 	 */
 	private function configure_debugging() {
 		// set debug log status based on the plugin's debug mode setting.
-		if ( true === $this->debug ) {
+		if ( $this->debug === true ) {
 			$this->statuses_to_log[] = 'debug';
 			$this->enabled           = true;
 		} else {
@@ -200,7 +200,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 	 * @return string
 	 */
 	public function set_log_slug( $override_slug, $slug, $post_ID, $post_status, $post_type ) {
-		if ( 'wp_log' === $post_type ) {
+		if ( $post_type === 'wp_log' ) {
 			$override_slug = uniqid( $post_type . '-', true ) . '-' . wp_generate_password( 32, false );
 		}
 		return $override_slug;
@@ -235,7 +235,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 	 * @param int    $post_id the ID of the currently listed post in the table.
 	 */
 	public function type_column_content( $column_name, $post_id ) {
-		if ( 'type' !== $column_name ) {
+		if ( $column_name !== 'type' ) {
 			return;
 		}
 		// get wp_log_type.
@@ -260,9 +260,9 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 		global $pagenow;
 		$type     = 'wp_log';
 		$taxonomy = 'wp_log_type';
-		if ( is_admin() && 'edit.php' === $pagenow ) {
+		if ( is_admin() && $pagenow === 'edit.php' ) {
 			if ( isset( $_GET['post_type'] ) && esc_attr( $_GET['post_type'] ) === $type ) {
-				if ( isset( $_GET[ $taxonomy ] ) && '' !== $_GET[ $taxonomy ] ) {
+				if ( isset( $_GET[ $taxonomy ] ) && $_GET[ $taxonomy ] !== '' ) {
 					$query->post_type = $type;
 					$query->tax_query = array(
 						array(
@@ -285,7 +285,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 		$type     = 'wp_log';
 		$taxonomy = 'wp_log_type';
 		// only add filter to post type you want.
-		if ( 'wp_log' === $post_type ) {
+		if ( $post_type === 'wp_log' ) {
 			// get wp_log_type.
 			$terms = get_terms(
 				array(
@@ -345,7 +345,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 				$clear_schedule = true;
 			}
 		}
-		if ( true === $clear_schedule ) {
+		if ( $clear_schedule === true ) {
 			wp_clear_scheduled_hook( $this->schedule_name );
 			$this->save_log_schedule();
 		}
@@ -356,7 +356,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 	 */
 	public function save_log_schedule() {
 		global $pagenow;
-		if ( ( 'options.php' !== $pagenow ) && ( ! isset( $_GET['page'] ) || $this->slug . '-admin' !== $_GET['page'] ) ) {
+		if ( ( $pagenow !== 'options.php' ) && ( ! isset( $_GET['page'] ) || $this->slug . '-admin' !== $_GET['page'] ) ) {
 			return;
 		}
 		$schedule_unit   = get_option( $this->option_prefix . 'logs_how_often_unit', '' );
@@ -455,7 +455,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 	 */
 	public function set_prune_age( $how_old ) {
 		$value = get_option( $this->option_prefix . 'logs_how_old', '' ) . ' ago';
-		if ( '' !== $value ) {
+		if ( $value !== '' ) {
 			return $value;
 		} else {
 			return $how_old;
@@ -471,7 +471,7 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 	public function set_prune_args( $args ) {
 		$args['wp_log_type'] = 'salesforce';
 		$number_to_prune     = get_option( $this->option_prefix . 'logs_how_many_number', '' );
-		if ( '' !== $number_to_prune ) {
+		if ( $number_to_prune !== '' ) {
 			$args['posts_per_page'] = filter_var( $number_to_prune, FILTER_SANITIZE_NUMBER_INT );
 		}
 		return $args;
@@ -508,13 +508,13 @@ class Object_Sync_Sf_Logging extends WP_Logging {
 			$title = $title_or_params;
 		}
 
-		if ( true === $this->enabled && in_array( $status, $this->statuses_to_log, true ) ) {
+		if ( $this->enabled === true && in_array( $status, $this->statuses_to_log, true ) ) {
 			$triggers_to_log = maybe_unserialize( get_option( $this->option_prefix . 'triggers_to_log', array() ) );
-			if ( in_array( $trigger, $triggers_to_log, true ) || 0 === $trigger ) {
+			if ( in_array( $trigger, $triggers_to_log, true ) || $trigger === 0 ) {
 				$this->add( $title, $message, $parent );
 			} elseif ( is_array( $trigger ) && array_intersect( $trigger, $triggers_to_log ) ) {
 				$this->add( $title, $message, $parent );
-			} elseif ( true === $this->debug ) {
+			} elseif ( $this->debug === true ) {
 				// if the plugin is in debug mode, treat all triggers as triggers to log.
 				$this->add( $title, $message, $parent );
 			}

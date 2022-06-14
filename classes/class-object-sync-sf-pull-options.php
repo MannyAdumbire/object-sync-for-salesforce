@@ -68,12 +68,12 @@ class Object_Sync_Sf_Pull_Options {
 		$params = array_filter(
 			$params,
 			function( $value ) {
-				return ! is_null( $value ) && '' !== $value;
+				return ! is_null( $value ) && $value !== '';
 			}
 		);
 
 		// legacy keys don't have a fieldmap.
-		if ( true === $legacy && isset( $params['fieldmap_id'] ) ) {
+		if ( $legacy === true && isset( $params['fieldmap_id'] ) ) {
 			unset( $params['fieldmap_id'] );
 		}
 
@@ -116,7 +116,7 @@ class Object_Sync_Sf_Pull_Options {
 
 		$result = update_option( $key, $value, $autoload );
 
-		if ( true === $result ) {
+		if ( $result === true ) {
 			$legacy_key = $this->generate_option_key( $params, true );
 			// if the legacy key exists and the keys are not the same, we might need to upgrade.
 			if ( get_option( $legacy_key ) && $key !== $legacy_key ) {
@@ -140,7 +140,7 @@ class Object_Sync_Sf_Pull_Options {
 	private function legacy_option_upgrade( $operation, $object_type = '', $fieldmap_id = '', $value = '', $autoload = true ) {
 		$result       = false;
 		$legacy_value = $this->legacy_get( $operation, $object_type, $fieldmap_id );
-		if ( false !== $legacy_value ) {
+		if ( $legacy_value !== false ) {
 			// generate the option key parameters.
 			$params = array(
 				'operation'   => $operation,
@@ -150,7 +150,7 @@ class Object_Sync_Sf_Pull_Options {
 			$key    = $this->generate_option_key( $params, true );
 			$this->add_upgradeable_key( $key );
 			$result = $this->set( $operation, $object_type, $fieldmap_id, $legacy_value );
-			if ( true === $result ) {
+			if ( $result === true ) {
 				$this->legacy_delete( $key );
 			}
 		}
@@ -246,7 +246,7 @@ class Object_Sync_Sf_Pull_Options {
 	 */
 	public function legacy_delete( $key ) {
 		$result = delete_option( $key );
-		if ( true === $result ) {
+		if ( $result === true ) {
 			$this->remove_upgradeable_key( $key );
 		}
 		return $result;
@@ -264,7 +264,7 @@ class Object_Sync_Sf_Pull_Options {
 		$keys[] = $key;
 		$keys   = array_unique( $keys );
 		$result = update_option( $this->option_prefix . 'upgradeable_keys', $keys );
-		if ( true === $result ) {
+		if ( $result === true ) {
 			$this->upgradeable_keys = $keys;
 			return $this->upgradeable_keys;
 		}
@@ -280,11 +280,11 @@ class Object_Sync_Sf_Pull_Options {
 	private function remove_upgradeable_key( $key ) {
 		$keys      = $this->get_upgradeable_keys();
 		$array_key = array_search( $key, $keys, true );
-		if ( false !== $array_key ) {
+		if ( $array_key !== false ) {
 			unset( $keys[ $array_key ] );
 		}
 		$result = update_option( $this->option_prefix . 'upgradeable_keys', $keys );
-		if ( true === $result ) {
+		if ( $result === true ) {
 			$this->upgradeable_keys = $keys;
 			if ( empty( $keys ) ) {
 				delete_option( $this->option_prefix . 'upgradeable_keys' );

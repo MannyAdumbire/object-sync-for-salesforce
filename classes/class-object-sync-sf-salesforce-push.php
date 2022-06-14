@@ -158,7 +158,7 @@ class Object_Sync_Sf_Salesforce_Push {
 		if ( $db_version === $this->version ) {
 			foreach ( $this->mappings->get_fieldmaps( null, $this->mappings->active_fieldmap_conditions ) as $mapping ) {
 				$object_type = $mapping['wordpress_object'];
-				if ( 'user' === $object_type ) {
+				if ( $object_type === 'user' ) {
 					if ( defined( 'ultimatemember_plugin_name' ) ) {
 						add_action( 'um_user_register', array( $this, 'um_add_user' ), 11, 2 );
 					} else {
@@ -166,21 +166,21 @@ class Object_Sync_Sf_Salesforce_Push {
 					}
 					add_action( 'profile_update', array( $this, 'edit_user' ), 11, 2 );
 					add_action( 'delete_user', array( $this, 'delete_user' ) );
-				} elseif ( 'post' === $object_type ) {
+				} elseif ( $object_type === 'post' ) {
 					add_action( 'save_post', array( $this, 'post_actions' ), 11, 2 );
 					if ( class_exists( 'ACF' ) ) {
 						// front end forms on ACF use this hook.
 						add_action( 'acf/save_post', array( $this, 'acf_save' ), 10 );
 					}
-				} elseif ( 'attachment' === $object_type ) {
+				} elseif ( $object_type === 'attachment' ) {
 					add_action( 'add_attachment', array( $this, 'add_attachment' ) );
 					add_action( 'edit_attachment', array( $this, 'edit_attachment' ) );
 					add_action( 'delete_attachment', array( $this, 'delete_attachment' ) );
-				} elseif ( 'category' === $object_type || 'tag' === $object_type || 'post_tag' === $object_type ) {
+				} elseif ( $object_type === 'category' || $object_type === 'tag' || $object_type === 'post_tag' ) {
 					add_action( 'create_term', array( $this, 'add_term' ), 11, 3 );
 					add_action( 'edit_terms', array( $this, 'edit_term' ), 11, 2 );
 					add_action( 'delete_term', array( $this, 'delete_term' ), 10, 4 );
-				} elseif ( 'comment' === $object_type ) {
+				} elseif ( $object_type === 'comment' ) {
 					add_action( 'comment_post', array( $this, 'add_comment' ), 11, 3 );
 					add_action( 'edit_comment', array( $this, 'edit_comment' ) );
 					add_action( 'delete_comment', array( $this, 'delete_comment' ) ); // to be clear: this only runs when the comment gets deleted from the trash, either manually or automatically.
@@ -224,10 +224,10 @@ class Object_Sync_Sf_Salesforce_Push {
 		if ( isset( $trigger ) ) {
 			$results = $this->salesforce_push_object_crud( $object_type, $object, $trigger, true );
 			foreach ( $results as $result ) {
-				if ( isset( $result['status'] ) && 'success' === $result['status'] ) {
-					if ( 'POST' === $http_method || 'PUT' === $http_method ) {
+				if ( isset( $result['status'] ) && $result['status'] === 'success' ) {
+					if ( $http_method === 'POST' || $http_method === 'PUT' ) {
 						$code = '201';
-					} elseif ( 'DELETE' === $http_method ) {
+					} elseif ( $http_method === 'DELETE' ) {
 						$code = '204';
 					}
 				} else {
@@ -304,7 +304,7 @@ class Object_Sync_Sf_Salesforce_Push {
 			return;
 		}
 		$post = get_post( $post_id );
-		if ( null !== $post ) {
+		if ( $post !== null ) {
 			$this->post_actions( $post_id, $post );
 		}
 	}
@@ -325,20 +325,20 @@ class Object_Sync_Sf_Salesforce_Push {
 
 		$post_type = $post->post_type;
 
-		if ( isset( $post->post_status ) && 'auto-draft' === $post->post_status ) {
+		if ( isset( $post->post_status ) && $post->post_status === 'auto-draft' ) {
 			return;
 		}
 		// this plugin does not sync log, revision, or scheduled-action posts with Salesforce since they're all included in this plugin for other purposes.
 		if ( isset( $post->post_type ) && in_array( $post->post_type, array( 'wp_log', 'revision', 'scheduled-action' ), true ) ) {
 			return;
 		}
-		if ( $post->post_modified_gmt === $post->post_date_gmt && 'trash' !== $post->post_status ) {
+		if ( $post->post_modified_gmt === $post->post_date_gmt && $post->post_status !== 'trash' ) {
 			$update = 0;
 			$delete = 0;
-		} elseif ( 'trash' !== $post->post_status ) {
+		} elseif ( $post->post_status !== 'trash' ) {
 			$update = 1;
 			$delete = 0;
-		} elseif ( 'trash' === $post->post_status ) {
+		} elseif ( $post->post_status === 'trash' ) {
 			$update = 0;
 			$delete = 1;
 		}
@@ -357,15 +357,15 @@ class Object_Sync_Sf_Salesforce_Push {
 		}
 
 		// if it is NOT a deletion, don't flag it as such.
-		if ( 1 !== $delete ) {
+		if ( $delete !== 1 ) {
 			$post = $this->wordpress->get_wordpress_object_data( $post->post_type, $post_id );
 		} else {
 			// otherwise, flag that this item has been deleted.
 			$post = $this->wordpress->get_wordpress_object_data( $post->post_type, $post_id, true );
 		}
-		if ( 1 === $update ) {
+		if ( $update === 1 ) {
 			$this->object_update( $post, $post_type );
-		} elseif ( 1 === $delete ) {
+		} elseif ( $delete === 1 ) {
 			$this->object_delete( $post, $post_type );
 		} else {
 			$this->object_insert( $post, $post_type );
@@ -564,17 +564,17 @@ class Object_Sync_Sf_Salesforce_Push {
 				}
 
 				// if there is a valid transient value, we're currently pulling this record and not pushing it.
-				if ( 1 === $transient_is_pulling ) {
+				if ( $transient_is_pulling === 1 ) {
 					$salesforce_pulling = 1;
 				} else {
 					$salesforce_pulling = 0;
 				}
 
-				if ( 1 === $salesforce_pulling ) {
+				if ( $salesforce_pulling === 1 ) {
 					// if it is pulling, delete the transient and continue on through the loop.
 					// we need to either do this for every individual mapping object, or only do it when all the mapping objects are done.
 							$transients_to_delete[ $fieldmap_key ]['transients'][] = $mapping_object_id_transient;
-					if ( true === $this->debug ) {
+					if ( $this->debug === true ) {
 						// create log entry for failed pull.
 						$status = 'debug';
 						$title  = sprintf(
@@ -619,7 +619,7 @@ class Object_Sync_Sf_Salesforce_Push {
 
 			$push_allowed = $this->is_push_allowed( $object_type, $object, $sf_sync_trigger, $mapping, $map_sync_triggers );
 
-			if ( false === $push_allowed ) {
+			if ( $push_allowed === false ) {
 
 				// we need to get the WordPress id here so we can check to see if the object already has a map.
 				$structure               = $this->wordpress->get_wordpress_table_structure( $object_type );
@@ -647,17 +647,17 @@ class Object_Sync_Sf_Salesforce_Push {
 				$op = '';
 				switch ( $sf_sync_trigger ) {
 					case $this->mappings->sync_wordpress_create:
-						if ( true === $is_new ) {
+						if ( $is_new === true ) {
 							$op = 'Create';
 						}
 						break;
 					case $this->mappings->sync_wordpress_update:
-						if ( false === $is_new ) {
+						if ( $is_new === false ) {
 							$op = 'Update';
 						}
 						break;
 					case $this->mappings->sync_wordpress_delete:
-						if ( false === $is_new ) {
+						if ( $is_new === false ) {
 							$op = 'Delete';
 						}
 						break;
@@ -680,12 +680,12 @@ class Object_Sync_Sf_Salesforce_Push {
 					'parent'  => esc_attr( $object[ $wordpress_id_field_name ] ),
 					'status'  => $log_status,
 				);
-				if ( '' !== $op ) {
+				if ( $op !== '' ) {
 					$this->logging->setup( $result );
 				}
 				$results[] = $result;
 
-				if ( isset( $mapping['always_delete_object_maps_on_delete'] ) && ( '1' === $mapping['always_delete_object_maps_on_delete'] ) ) {
+				if ( isset( $mapping['always_delete_object_maps_on_delete'] ) && ( $mapping['always_delete_object_maps_on_delete'] === '1' ) ) {
 					if ( $sf_sync_trigger === $this->mappings->sync_wordpress_delete ) {
 						foreach ( $mapping_objects as $mapping_object ) {
 							if ( isset( $mapping_object['id'] ) ) {
@@ -699,12 +699,12 @@ class Object_Sync_Sf_Salesforce_Push {
 
 			// push drafts if the setting says so
 			// post status is draft, or post status is inherit and post type is not attachment.
-			if ( ( ! isset( $mapping['push_drafts'] ) || '1' !== $mapping['push_drafts'] ) && isset( $object['post_status'] ) && ( 'draft' === $object['post_status'] || ( 'inherit' === $object['post_status'] && 'attachment' !== $object['post_type'] ) ) ) {
+			if ( ( ! isset( $mapping['push_drafts'] ) || $mapping['push_drafts'] !== '1' ) && isset( $object['post_status'] ) && ( $object['post_status'] === 'draft' || ( $object['post_status'] === 'inherit' && $object['post_type'] !== 'attachment' ) ) ) {
 				// skip this object if it is a draft and the fieldmap settings told us to ignore it.
 				continue;
 			}
 
-			if ( isset( $mapping['push_async'] ) && ( '1' === $mapping['push_async'] ) && false === $manual ) {
+			if ( isset( $mapping['push_async'] ) && ( $mapping['push_async'] === '1' ) && $manual === false ) {
 				// because this item is async, add it to the queue so it can be pushed to Salesforce.
 				$this->queue->add(
 					$this->schedulable_classes[ $this->schedule_name ]['callback'],
@@ -789,7 +789,7 @@ class Object_Sync_Sf_Salesforce_Push {
 
 		// If Salesforce is not authorized, don't do anything.
 		// it's unclear to me if we need to do something else here or if this is sufficient. This is all Drupal does.
-		if ( true !== $this->salesforce['is_authorized'] ) {
+		if ( $this->salesforce['is_authorized'] !== true ) {
 			return;
 		}
 
@@ -855,7 +855,7 @@ class Object_Sync_Sf_Salesforce_Push {
 				$mapping_objects = $this->mappings->load_object_maps_by_salesforce_id( $mapping_object['salesforce_id'], $mapping );
 
 				// only delete if there are no additional mapping objects for this record.
-				if ( 1 === count( $mapping_objects ) ) {
+				if ( count( $mapping_objects ) === 1 ) {
 
 					$frequencies = $this->queue->get_frequencies();
 					$seconds     = reset( $frequencies )['frequency'] + 60;
@@ -960,7 +960,7 @@ class Object_Sync_Sf_Salesforce_Push {
 				} // End if() statement.
 
 				// right here we should change the pushing_object_id transient to the Salesforce Id value.
-				if ( isset( $api_result['code'] ) && (int) 204 === $api_result['code'] ) {
+				if ( isset( $api_result['code'] ) && $api_result['code'] === (int) 204 ) {
 					$this->sync_transients->set( 'salesforce_pushing_' . $mapping_object['salesforce_id'], '', $mapping['id'], 1 );
 					$this->sync_transients->set( 'salesforce_pushing_object_id', '', $mapping['id'], $mapping_object['salesforce_id'] );
 				}
@@ -994,7 +994,7 @@ class Object_Sync_Sf_Salesforce_Push {
 
 			// if the parameters array is empty at this point, we should create a log entry to that effect.
 			// I think it should be a debug message, unless we learn from users that it should be raised to an error.
-			if ( true === $this->debug ) {
+			if ( $this->debug === true ) {
 				$status = 'debug';
 				$title  = sprintf(
 					// translators: %1$s is the log status.
@@ -1009,7 +1009,7 @@ class Object_Sync_Sf_Salesforce_Push {
 					esc_attr( $mapping['salesforce_object'] )
 				);
 				// whether it's a new mapping object or not.
-				if ( false === $is_new ) {
+				if ( $is_new === false ) {
 					// this one is not new.
 					$body .= sprintf(
 						// translators: placeholders are: 1) the mapping object row ID, 2) the name of the WordPress object, 3) the ID of the WordPress object, 4) the ID of the Salesforce object it was trying to map.
@@ -1067,8 +1067,8 @@ class Object_Sync_Sf_Salesforce_Push {
 		$saved_params = filter_var( get_option( $this->option_prefix . 'missing_required_data_id_' . $object[ $wordpress_id_field_name ], false ), FILTER_VALIDATE_BOOLEAN );
 
 		// start the is_new stuff.
-		if ( true === $is_new || true === $saved_params ) {
-			if ( true === $saved_params ) {
+		if ( $is_new === true || $saved_params === true ) {
+			if ( $saved_params === true ) {
 				delete_option( $this->option_prefix . 'missing_required_data_id_' . $object[ $wordpress_id_field_name ] );
 			}
 			// right here we should set the pushing transient
@@ -1090,7 +1090,7 @@ class Object_Sync_Sf_Salesforce_Push {
 
 			// setup SF record type. CampaignMember objects get their Campaign's type
 			// i am still a bit confused about this.
-			if ( $mapping['salesforce_record_type_default'] !== $this->mappings->salesforce_default_record_type && empty( $params['RecordTypeId'] ) && ( 'CampaignMember' !== $mapping['salesforce_object'] ) ) {
+			if ( $mapping['salesforce_record_type_default'] !== $this->mappings->salesforce_default_record_type && empty( $params['RecordTypeId'] ) && ( $mapping['salesforce_object'] !== 'CampaignMember' ) ) {
 				$params['RecordTypeId'] = $mapping['salesforce_record_type_default'];
 			}
 
@@ -1111,7 +1111,7 @@ class Object_Sync_Sf_Salesforce_Push {
 			// returns $params.
 			$params = apply_filters( $this->option_prefix . 'push_update_params_modify', $params, $salesforce_id, $mapping, $object, $mapping['wordpress_object'] );
 
-			if ( isset( $prematch_field_wordpress ) || isset( $key_field_wordpress ) || null !== $salesforce_id ) {
+			if ( isset( $prematch_field_wordpress ) || isset( $key_field_wordpress ) || $salesforce_id !== null ) {
 
 				// if either prematch criteria exists, make the values queryable.
 
@@ -1141,7 +1141,7 @@ class Object_Sync_Sf_Salesforce_Push {
 					$upsert_value = $encoded_key_value;
 				}
 
-				if ( null !== $salesforce_id ) {
+				if ( $salesforce_id !== null ) {
 					$upsert_key   = 'Id';
 					$upsert_value = $salesforce_id;
 				}
@@ -1153,7 +1153,7 @@ class Object_Sync_Sf_Salesforce_Push {
 
 			try {
 
-				if ( 'Upsert' === $op ) {
+				if ( $op === 'Upsert' ) {
 					$api_result = $sfapi->object_upsert( $mapping['salesforce_object'], $upsert_key, $upsert_value, $params );
 					// Handle upsert responses.
 					switch ( $sfapi->response['code'] ) {
@@ -1508,7 +1508,7 @@ class Object_Sync_Sf_Salesforce_Push {
 	 */
 	private function create_object_map( $wordpress_object, $id_field_name, $salesforce_id, $field_mapping, $pending = false ) {
 
-		if ( true === $pending ) {
+		if ( $pending === true ) {
 			$action = 'pending';
 		} else {
 			$action = 'created';

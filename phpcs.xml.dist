@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="Object Sync for Salesforce">
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Object Sync for Salesforce">
 	<config name="minimum_supported_wp_version" value="5.2" />
 	<config name="testVersion" value="5.6.20-"/>
 
@@ -26,4 +26,8 @@
 	<exclude-pattern>/node_modules/*</exclude-pattern>
 	<exclude-pattern>/tests/*</exclude-pattern>
 	<exclude-pattern>/vendor/*</exclude-pattern>
+
+	<!-- Disallow Yoda conditions. -->
+    <rule ref="Generic.ControlStructures.DisallowYodaConditions"/>
+    <rule ref="SlevomatCodingStandard.ControlStructures.DisallowYodaComparison"/>
 </ruleset>

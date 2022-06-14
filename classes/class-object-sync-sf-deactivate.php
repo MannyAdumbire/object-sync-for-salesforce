@@ -84,7 +84,7 @@ class Object_Sync_Sf_Deactivate {
 		$this->queue               = object_sync_for_salesforce()->queue;
 
 		$delete_data = (int) get_option( $this->option_prefix . 'delete_data_on_uninstall', 0 );
-		if ( 1 === $delete_data ) {
+		if ( $delete_data === 1 ) {
 			register_deactivation_hook( dirname( __DIR__ ) . '/' . $this->slug . '.php', array( $this, 'wordpress_salesforce_drop_tables' ) );
 			register_deactivation_hook( dirname( __DIR__ ) . '/' . $this->slug . '.php', array( $this, 'clear_schedule' ) );
 			register_deactivation_hook( dirname( __DIR__ ) . '/' . $this->slug . '.php', array( $this, 'delete_log_post_type' ) );
@@ -144,7 +144,7 @@ class Object_Sync_Sf_Deactivate {
 		$roles = apply_filters( $this->option_prefix . 'roles_configure_salesforce', null );
 
 		// for each role that we have, remove the configure salesforce capability.
-		if ( null !== $roles ) {
+		if ( $roles !== null ) {
 			foreach ( $roles as $role ) {
 				$role->remove_cap( 'configure_salesforce' );
 			}

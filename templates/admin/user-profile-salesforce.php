@@ -35,7 +35,7 @@
 		</tr>
 		<tr>
 			<th><?php echo esc_html__( 'Last Sync Status', 'object-sync-for-salesforce' ); ?></th>
-			<td class="last_sync_status"><?php echo ( isset( $mapping['last_sync_status'] ) && '1' === $mapping['last_sync_status'] ) ? esc_html__( 'success', 'object-sync-for-salesforce' ) : esc_html__( 'error', 'object-sync-for-salesforce' ); ?></td>
+			<td class="last_sync_status"><?php echo ( isset( $mapping['last_sync_status'] ) && $mapping['last_sync_status'] === '1' ) ? esc_html__( 'success', 'object-sync-for-salesforce' ) : esc_html__( 'error', 'object-sync-for-salesforce' ); ?></td>
 			<td>&nbsp;</td>
 		</tr>
 		<tr>

@@ -258,15 +258,15 @@ class Object_Sync_Sf_Rest {
 			case 'mappings':
 				break;
 			case 'pull':
-				if ( 'GET' === $http_method ) {
+				if ( $http_method === 'GET' ) {
 					$result = $this->pull->salesforce_pull_webhook( $request );
 				}
-				if ( 'POST' === $http_method && isset( $body_params['salesforce_object_type'] ) && isset( $body_params['salesforce_id'] ) ) {
+				if ( $http_method === 'POST' && isset( $body_params['salesforce_object_type'] ) && isset( $body_params['salesforce_id'] ) ) {
 					$result = $this->pull->manual_pull( $body_params['salesforce_object_type'], $body_params['salesforce_id'] );
 				}
 				break;
 			case 'push':
-				if ( ( 'POST' === $http_method || 'PUT' === $http_method || 'DELETE' === $http_method ) && isset( $body_params['wordpress_object_type'] ) && isset( $body_params['wordpress_id'] ) ) {
+				if ( ( $http_method === 'POST' || $http_method === 'PUT' || $http_method === 'DELETE' ) && isset( $body_params['wordpress_object_type'] ) && isset( $body_params['wordpress_id'] ) ) {
 					$result = $this->push->manual_push( $body_params['wordpress_object_type'], $body_params['wordpress_id'], $http_method );
 				}
 				break;
